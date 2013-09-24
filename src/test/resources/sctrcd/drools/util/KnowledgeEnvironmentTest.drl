@@ -1,0 +1,15 @@
+package com.sctrcd.drools.util
+
+import com.sctrcd.drools.util.KnowledgeEnvironmentTest.Message
+
+rule "Say hello"
+	dialect "java"
+	lock-on-active true
+	no-loop
+when
+	$msg : Message()
+then
+	modify( $msg ) {
+		setText("Hello, World!")
+	}
+end

@@ -1,0 +1,43 @@
+package sctrcd.payments.rules
+
+import com.sctrcd.payments.facts.*
+import com.sctrcd.payments.validation.Mod97Check
+
+global java.util.List countryList;
+
+rule "IBAN failed the Mod-97 checksum test."
+    no-loop
+when
+    $req: IbanValidationRequest($iban:iban, $country:iban.substring(0, 2))
+    eval(!Mod97Check.isValid($iban))
+then
+    $req.reject("The IBAN is not valid.");
+end
+
+rule "IBAN doesn't begin with a country ISO code."
+    no-loop
+when
+    $req: IbanValidationRequest($iban:iban, $country:iban.substring(0, 2))
+    not Country(isoCode == $country) from countryList
+then
+    $req.reject("The IBAN does not begin with a 2-character country code. '" + $country + "' is not a country.");
+    update($req);
+end
+
+// A UK IBAN should have the following structure:
+//     GB19 LOYD 3096 1700 7099 43
+// 2-letter country code "GB"
+// 4-letter bank code
+// 6-digit sort code
+// 8-digit account number
+rule "IBAN is for UK, but doesn't have BBAN structure."
+    no-loop
+when
+    $req: IbanValidationRequest(
+        $country:iban.substring(0, 2) == "GB",
+        $iban:iban not matches "GB[0-9]{2}[a-zA-Z]{4}[0-9]{14}"
+    )
+then
+    $req.reject("The IBAN is for the UK, but doesn't follow the standard UK structure.");
+    update($req);
+end
