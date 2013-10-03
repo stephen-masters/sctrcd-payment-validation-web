@@ -53,7 +53,6 @@ public class Mod97Check {
     	String shuffledIban = shuffle(cleanIban);
     	// Convert to a numeric form.
     	BigInteger checkSum = numerize(shuffledIban);
-    	System.out.println(checkSum);
         // If the checksum divided by 97 leaves a remainder of 1,
         // the IBAN is valid.
         return new BigInteger(checkSum.toString()).remainder(new BigInteger("97"))
