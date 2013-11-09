@@ -1,13 +1,10 @@
 package com.sctrcd.payments.validation.payment;
 
-import java.util.List;
-
-import org.drools.spi.KnowledgeHelper;
 import org.junit.Test;
 
 import com.sctrcd.payments.facts.Payment;
 import com.sctrcd.payments.facts.PaymentAttribute;
-import com.sctrcd.payments.facts.PaymentValidationAnnotation;
+import com.sctrcd.payments.validation.ValidationTestHelper;
 import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
 import com.sctrcd.payments.validation.payment.PaymentValidator;
 import com.sctrcd.payments.validation.payment.RuleBasedPaymentValidator;
@@ -29,7 +26,7 @@ public class RuleBasedPaymentValidatorTest {
         payment.setIban("LU36 0029 1524 6005 0000");
         FxPaymentValidationResult result = validator.validatePayment(payment);
 
-        assertNoIbanRejections(result.getAnnotations());
+        ValidationTestHelper.assertNoRejectionsForAttribute(result.getAnnotations(), PaymentAttribute.iban);
 
         // A payment could be rejected for reasons other than the IBAN, so in
         // the future, this assertion could break for a valid reason. At that
@@ -46,7 +43,7 @@ public class RuleBasedPaymentValidatorTest {
         FxPaymentValidationResult result = validator.validatePayment(payment);
 
         assertFalse(result.isValid());
-        assertAtLeastOneRejection(result.getAnnotations(), PaymentAttribute.iban);
+        ValidationTestHelper.assertAtLeastOneRejectionForAttribute(result.getAnnotations(), PaymentAttribute.iban);
     }
 
     @Test
@@ -55,7 +52,7 @@ public class RuleBasedPaymentValidatorTest {
         payment.setIban("GB29 NWBK 6016 1331 9268 19");
         FxPaymentValidationResult result = validator.validatePayment(payment);
 
-        assertNoIbanRejections(result.getAnnotations());
+        ValidationTestHelper.assertNoRejectionsForAttribute(result.getAnnotations(), PaymentAttribute.iban);
 
         // A payment could be rejected for reasons other than the IBAN, so in
         // the future, this assertion could break for a valid reason. At that
@@ -64,21 +61,6 @@ public class RuleBasedPaymentValidatorTest {
         // payment *except* for the IBAN.
         assertTrue(result.isValid());
     }
-
-    /**
-     * Iterates through the annotations on a payment and validates that none of
-     * them are rejections of the IBAN field.
-     * 
-     * @param annotations All the annotations added to a payment.
-     */
-    private void assertNoIbanRejections(
-            List<PaymentValidationAnnotation> annotations) {
-        for (PaymentValidationAnnotation ann : annotations) {
-            if (ann.getAttribute() == PaymentAttribute.iban) {
-                assertTrue(ann.isValid());
-            }
-        }
-    }
     
     @Test
     public final void shouldAcceptValidBics() {
@@ -86,7 +68,7 @@ public class RuleBasedPaymentValidatorTest {
         payment.setBic("HLFXESMM");
         FxPaymentValidationResult result = validator.validatePayment(payment);
 
-        assertNoBicRejections(result.getAnnotations());
+        ValidationTestHelper.assertNoRejectionsForAttribute(result.getAnnotations(), PaymentAttribute.bic);
 
         // A payment could be rejected for reasons other than the IBAN, so in
         // the future, this assertion could break for a valid reason. At that
@@ -104,32 +86,7 @@ public class RuleBasedPaymentValidatorTest {
 
         assertFalse(result.isValid());
         
-        assertAtLeastOneRejection(result.getAnnotations(), PaymentAttribute.bic);
-    }
-
-    /**
-     * Iterates through the annotations on a payment and validates that none of
-     * them are rejections of the IBAN field.
-     * 
-     * @param annotations All the annotations added to a payment.
-     */
-    private void assertNoBicRejections(
-            List<PaymentValidationAnnotation> annotations) {
-        for (PaymentValidationAnnotation ann : annotations) {
-            if (ann.getAttribute() == PaymentAttribute.bic) {
-                assertTrue(ann.isValid());
-            }
-        }
-    }
-    private void assertAtLeastOneRejection(
-            List<PaymentValidationAnnotation> annotations,
-            PaymentAttribute attribute) {
-        for (PaymentValidationAnnotation ann : annotations) {
-            if (ann.getAttribute() == attribute && !ann.isValid()) {
-                return;
-            }
-        }
-        assertTrue("Failed to find a rejection for the " + attribute + " attribute.", false);
+        ValidationTestHelper.assertAtLeastOneRejectionForAttribute(result.getAnnotations(), PaymentAttribute.bic);
     }
     
 }

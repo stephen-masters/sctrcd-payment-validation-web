@@ -74,6 +74,11 @@ when
         $country:iban.substring(0, 2) == "GB",
         $iban:iban not matches "GB[0-9]{2}[a-zA-Z]{4}[0-9]{14}"
     )
+    not PaymentValidationAnnotation(
+        attribute == PaymentAttribute.iban,
+        level == AnnotationLevel.REJECT, 
+        ruleName == "IBAN is for UK, but doesn't have BBAN structure."
+    )
 then
     insert( 
         new PaymentValidationAnnotation(
@@ -83,6 +88,19 @@ then
             PaymentAttribute.iban
         )
     );
+end
+
+
+rule "Add annotations to IBAN request"
+    salience -1 // Activate at end of validations to accumulate results.
+    no-loop
+when
+    $req: IbanValidationRequest()
+    $ann: PaymentValidationAnnotation(attribute == PaymentAttribute.iban)
+then
+    $req.addAnnotation($ann);
+    // Note that we don't update the request. If we do, then we trigger 
+    // re-evaluation of the fact, and create an infinite loop.
 end
 
 

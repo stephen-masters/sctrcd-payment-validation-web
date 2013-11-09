@@ -1,12 +1,10 @@
 package com.sctrcd.payments.validation.iban;
 
-import java.util.List;
-
 import org.junit.Test;
 
 import com.sctrcd.payments.facts.AnnotationLevel;
 import com.sctrcd.payments.facts.PaymentAttribute;
-import com.sctrcd.payments.facts.PaymentValidationAnnotation;
+import com.sctrcd.payments.validation.ValidationTestHelper;
 import com.sctrcd.payments.validation.iban.IbanMod97Check;
 import com.sctrcd.payments.validation.iban.IbanUtil;
 import com.sctrcd.payments.validation.iban.IbanValidationResult;
@@ -30,8 +28,9 @@ public class RuleBasedIbanValidatorTest {
         for (String iban : SimpleIbanValidatorTest.validIbans) {
             assertTrue(IbanMod97Check.isValid(iban));
             IbanValidationResult result = validator.validateIban(IbanUtil.sanitize(iban));
-            assertNoIbanRejections(result.getAnnotations());
+
             assertTrue(result.isValid());
+            ValidationTestHelper.assertNoRejectionsForAttribute(result.getAnnotations(), PaymentAttribute.iban);
         }
     }
     
@@ -45,25 +44,9 @@ public class RuleBasedIbanValidatorTest {
         for (String iban : SimpleIbanValidatorTest.invalidIbans) {
             assertFalse(IbanMod97Check.isValid(iban));
             IbanValidationResult result = validator.validateIban(IbanUtil.sanitize(iban));
-            for (PaymentValidationAnnotation annotation : result.getAnnotations()) {
-                assertFalse(annotation.isValid());
-            }
+
             assertFalse(result.isValid());
-        }
-    }
-    
-    /**
-     * Iterates through the annotations on a payment and validates that none of
-     * them are rejections of the IBAN field.
-     * 
-     * @param annotations All the annotations added to a payment.
-     */
-    private void assertNoIbanRejections(
-            List<PaymentValidationAnnotation> annotations) {
-        for (PaymentValidationAnnotation ann : annotations) {
-            if (ann.getAttribute() == PaymentAttribute.iban) {
-                assertTrue(ann.isValid());
-            }
+            ValidationTestHelper.assertAtLeastOneRejectionForAttribute(result.getAnnotations(), PaymentAttribute.iban);
         }
     }
     
