@@ -1,0 +1,112 @@
+package sctrcd.payments.rules
+
+import com.sctrcd.payments.facts.*
+import com.sctrcd.payments.validation.iban.IbanMod97Check
+
+global java.util.List countryList;
+
+
+rule "Trigger IBAN validation."
+when
+    $req: PaymentValidationRequest($payment:payment, payment.iban != null)
+    not IbanValidationRequest(iban == $payment.iban)
+then
+    insert(
+        new IbanValidationRequest($payment.getIban())
+    );
+end
+
+
+rule "IBAN failed the Mod-97 checksum test."
+    salience 100
+when
+    $req: IbanValidationRequest($iban:iban)
+    not PaymentValidationAnnotation(
+        attribute == PaymentAttribute.iban,
+        level == AnnotationLevel.REJECT, 
+        ruleName == "IBAN failed the Mod-97 checksum test."
+    )
+    eval(!IbanMod97Check.isValid($iban))
+then
+    insert(
+        new PaymentValidationAnnotation(
+            drools.getRule().getName(),
+            AnnotationLevel.REJECT, 
+            "The IBAN is not valid.", 
+            PaymentAttribute.iban
+        )
+    );
+end
+
+
+rule "IBAN doesn't begin with a valid country ISO code."
+    salience 90
+when
+    $req: IbanValidationRequest($iban:iban, $country:iban.substring(0, 2))
+    not PaymentValidationAnnotation(
+        attribute == PaymentAttribute.iban,
+        level == AnnotationLevel.REJECT, 
+        ruleName == "IBAN doesn't begin with a valid country ISO code."
+    )
+    not Country(isoCode == $country) from countryList
+then
+    insert(
+        new PaymentValidationAnnotation(
+            drools.getRule().getName(),
+            AnnotationLevel.REJECT, 
+            "The IBAN does not begin with a valid 2-character country code. '" + $country + "' is not a country.", 
+            PaymentAttribute.iban
+        )
+    );
+end
+
+
+// A UK IBAN will look something like the following:
+//     GB19 LOYD 3096 1700 7099 43
+// 2-letter country code "GB"
+// 4-letter bank code
+// 6-digit sort code
+// 8-digit account number
+rule "IBAN is for UK, but doesn't have BBAN structure."
+    salience 80 // Check for correct structure first.
+when
+    $req: IbanValidationRequest(
+        $country:iban.substring(0, 2) == "GB",
+        $iban:iban not matches "GB[0-9]{2}[a-zA-Z]{4}[0-9]{14}"
+    )
+then
+    insert( 
+        new PaymentValidationAnnotation(
+            drools.getRule().getName(),
+            AnnotationLevel.REJECT, 
+            "The IBAN is for the UK, but doesn't follow the standard UK structure.", 
+            PaymentAttribute.iban
+        )
+    );
+end
+
+
+rule "Derive most severe IBAN annotation"
+    salience -1 // Activate at end of validations to accumulate results.
+when
+    $req: IbanValidationRequest()
+    $ann: PaymentValidationAnnotation(
+        attribute == PaymentAttribute.iban, 
+        $lvl: level, 
+        $req.mostSevereAnnotation == null || level.ordinal() > $req.mostSevereAnnotation.ordinal()
+    )
+then
+    $req.setMostSevereAnnotation($lvl);
+    update( $req );
+end
+
+
+rule "Reject IBAN request if there is an IBAN rejection annotation"
+    salience -1 // Activate at end of validations to accumulate results.
+    no-loop
+when
+    $req: IbanValidationRequest(valid == true, mostSevereAnnotation == AnnotationLevel.REJECT)
+then
+    $req.setValid(false);
+    update( $req );
+end

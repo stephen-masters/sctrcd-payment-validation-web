@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.iban;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sctrcd.payments.enums.CountryEnum;
-import com.sctrcd.payments.facts.ValidationAnnotation;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
+import com.sctrcd.payments.facts.AnnotationLevel;
 
 /**
  * This IBAN validator does no more than check that the country code is for a
@@ -46,16 +47,16 @@ public class SimpleIbanValidator implements IbanValidator {
         IbanValidationResult result = new IbanValidationResult(iban, true);
         
         if (iban == null) {
-            result.addAnnotation(new ValidationAnnotation(false, "The IBAN  was not defined."));
+            result.addAnnotation(new PaymentValidationAnnotation("The IBAN  was not defined.", AnnotationLevel.REJECT, "The IBAN  was not defined."));
         }
         if (countryMap.get(iban.substring(0, 2)) == null) {
             // It's not a known country.
-            result.addAnnotation(new ValidationAnnotation(false, "The country code on the IBAN is not valid."));
+            result.addAnnotation(new PaymentValidationAnnotation("The country code on the IBAN is not valid.", AnnotationLevel.REJECT, "The country code on the IBAN is not valid."));
         }
         // If the checksum divided by 97 leaves a remainder of 1,
         // the IBAN is valid.
-        if (!Mod97Check.isValid(IbanUtil.sanitize(iban))) {
-            result.addAnnotation(new ValidationAnnotation(false, "The IBAN is not valid."));
+        if (!IbanMod97Check.isValid(IbanUtil.sanitize(iban))) {
+            result.addAnnotation(new PaymentValidationAnnotation("Failed Mod-97 check", AnnotationLevel.REJECT, "The IBAN is not valid."));
         }
         
         return result;

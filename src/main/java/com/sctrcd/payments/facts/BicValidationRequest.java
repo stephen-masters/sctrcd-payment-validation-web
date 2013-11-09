@@ -1,28 +1,28 @@
 package com.sctrcd.payments.facts;
 
-public class IbanValidationRequest extends ValidationRequest {
+public class BicValidationRequest extends ValidationRequest {
 
-    private String iban;
+    private String bic;
 
-    public IbanValidationRequest() {
+    public BicValidationRequest() {
         super();
     }
     
-    public IbanValidationRequest(String iban) {
+    public BicValidationRequest(String bic) {
         super();
-        this.setIban(iban);
+        this.setBic(bic);
     }
 
-    public String getIban() {
-        return iban;
+    public String getBic() {
+        return bic;
     }
 
     /**
      * Strips whitespace out of the IBAN before setting the field.
      * Whitespace is not relevant to validation.
      */
-    public void setIban(String iban) {
-        this.iban = iban.replace(" ", "");
+    public void setBic(String bic) {
+        this.bic = bic.replace(" ", "");
     }
     
     @Override

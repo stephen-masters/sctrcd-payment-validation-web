@@ -13,9 +13,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sctrcd.payments.PaymentAppConfig;
 import com.sctrcd.payments.facts.Payment;
-import com.sctrcd.payments.validation.FxPaymentValidationResult;
-import com.sctrcd.payments.validation.IbanValidationResult;
-import com.sctrcd.payments.validation.RuleBasedPaymentValidatorTest;
+import com.sctrcd.payments.validation.iban.IbanValidationResult;
+import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
+import com.sctrcd.payments.validation.payment.RuleBasedPaymentValidatorTest;
 import com.sctrcd.payments.validation.web.PaymentValidationController;
 
 @RunWith(SpringJUnit4ClassRunner.class)

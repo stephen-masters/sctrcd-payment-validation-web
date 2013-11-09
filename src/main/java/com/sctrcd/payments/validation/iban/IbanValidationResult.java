@@ -1,4 +1,6 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.iban;
+
+import com.sctrcd.payments.validation.ValidationResult;
 
 /**
  * Encapsulates an IBAN and the result of validating it.

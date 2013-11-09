@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.bic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,27 +15,23 @@ import com.sctrcd.drools.util.ResourcePathType;
 import com.sctrcd.drools.util.TrackingAgendaEventListener;
 import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
+import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
-import com.sctrcd.payments.facts.Payment;
-import com.sctrcd.payments.facts.PaymentValidationRequest;
 
 /**
  * 
  */
-@Service("ruleBasedPaymentValidator")
-public class RuleBasedPaymentValidator implements PaymentValidator {
+@Service("ruleBasedBicValidator")
+public class RuleBasedBicValidator implements BicValidator {
 
     private KnowledgeBase kbase;
     
     public final List<Country> countries = new ArrayList<Country>();
     
-    public RuleBasedPaymentValidator() {
+    public RuleBasedBicValidator() {
         this.kbase = DroolsUtil.createKnowledgeBase(
                 new DroolsResource[]{ 
-                        new DroolsResource("rules/payments/validation/iban/IbanRules.drl", 
-                                ResourcePathType.CLASSPATH, 
-                                ResourceType.DRL),
-                        new DroolsResource("rules/payments/validation/iban/PaymentRules.drl", 
+                        new DroolsResource("rules/payments/validation/BicRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
                 }, 
@@ -44,9 +40,9 @@ public class RuleBasedPaymentValidator implements PaymentValidator {
             countries.add(new Country(c.isoCode, c.name));
         }
     }
-    
+        
 	@Override
-	public FxPaymentValidationResult validatePayment(Payment payment) {
+	public BicValidationResult validate(String bic) {
 	    StatelessKnowledgeSession ksession = kbase.newStatelessKnowledgeSession();
 	    
 	    ksession.setGlobal("countryList", countries);
@@ -58,15 +54,15 @@ public class RuleBasedPaymentValidator implements PaymentValidator {
 	    ksession.addEventListener(agendaEventListener);
 	    ksession.addEventListener(workingMemoryEventListener);
 	    
-	    PaymentValidationRequest request = new PaymentValidationRequest(payment);
-	    request.setPayment(payment);
+	    BicValidationRequest request = new BicValidationRequest(bic); 
 	    
 	    List<Object> facts = new ArrayList<Object>();
 	    facts.add(request);
 	    
 		ksession.execute(facts);
 		
-		FxPaymentValidationResult result = new FxPaymentValidationResult();
+		BicValidationResult result = new BicValidationResult();
+		result.setBic(bic);
 		result.addAnnotations(request.getAnnotations());
 		
 		ksession.removeEventListener(agendaEventListener);

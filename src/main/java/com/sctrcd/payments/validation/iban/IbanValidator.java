@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.iban;
 
 public interface IbanValidator {
 

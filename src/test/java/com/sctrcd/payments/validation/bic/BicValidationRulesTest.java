@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.bic;
 
 import static org.junit.Assert.*;
 
@@ -18,21 +18,45 @@ import com.sctrcd.drools.util.ResourcePathType;
 import com.sctrcd.drools.util.TrackingAgendaEventListener;
 import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
+import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
-import com.sctrcd.payments.facts.IbanValidationRequest;
-import com.sctrcd.payments.facts.ValidationAnnotation;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
+import com.sctrcd.payments.validation.bic.BicValidationResult;
 
-public class IbanValidationRulesTest {
+/**
+ * A Business Identifier Code (BIC), also known as a BIC or SWIFT-BIC, is a
+ * format defined by ISO 9362:2009.
+ * 
+ * Ref: http://en.wikipedia.org/wiki/ISO_9362
+ * 
+ * The code is 8 or 11 characters long, made up of:
+ * 
+ * <pre>
+ *     4 letters: The Institution code or Bank code.
+ *                i.e. DEUT is Deutsche Bank.
+ *     2 letters: The ISO 3166-1 country code.
+ *     2 letters or digits: Location code.
+ *         Conventions for 2nd character:
+ *             0 - Typically a test BIC.
+ *             1 - A passive participant in the SWIFT network.
+ *             2 - Typically a reverse billing BIC where the recipient pays for the message.
+ *     3 letters or digits: Branch code. Optional "XXX" for primary office.
+ * </pre>
+ * 
+ * Where an 8-digit code is given, it may be assumed that it refers to the
+ * primary office.
+ */
+public class BicValidationRulesTest {
 
     private KnowledgeBase kbase;
     StatelessKnowledgeSession ksession;
     
     public final List<Country> countries = new ArrayList<Country>();
     
-    public IbanValidationRulesTest() {
+    public BicValidationRulesTest() {
         this.kbase = DroolsUtil.createKnowledgeBase(
                 new DroolsResource[]{ 
-                        new DroolsResource("rules/payments/validation/iban/IbanRules.drl", 
+                        new DroolsResource("rules/payments/validation/BicRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
                 }, 
@@ -49,47 +73,41 @@ public class IbanValidationRulesTest {
     }
     
     @Test
-    public void shouldNotAnnotateValidIban() {
-        ibanShouldValidateAsExpected("ES5702170302862100282783");
-    }
-
-    @Test
-    public void shouldRejectForInvalidMod97() {
-        ibanShouldValidateAsExpected("ES050 217009945", "IBAN failed the Mod-97 checksum test.");
+    public void shouldNotAnnotateValidBic() {
+        bicShouldValidateAsExpected("HLFXESMM");
+        bicShouldValidateAsExpected("HLFXESMM123");
     }
     
     @Test
-    public void shouldValidateUkStructure() {
-        // First a valid UK IBAN.
-        ibanShouldValidateAsExpected("GB29NWBK60161331926819");
-        // If inserted with spaces, we should be able to deal with that.
-        ibanShouldValidateAsExpected("GB29 NWBK 6016 1331 9268 19");
-        // Check that Mod-97 works correctly for this IBAN.
-        ibanShouldValidateAsExpected("GB29 NWBK 6016 1331 9268 20", "IBAN failed the Mod-97 checksum test.");
-        // Passes the Mod-97 check, but replaced letter in bank code with
-        // number, so that it is GB and does not have correct BBAN structure.
-        ibanShouldValidateAsExpected("GB29 NWB0 6016 1331 9268 19", "IBAN is for UK, but doesn't have BBAN structure.");
+    public void shouldValidateStructure() {
+        bicShouldValidateAsExpected("HLFXESM", "BIC doesn't follow ISO 9362 structure.");
+        bicShouldValidateAsExpected("1234ESMM123", "BIC doesn't follow ISO 9362 structure.");
     }
     
-    public void ibanShouldValidateAsExpected(String iban, String... expectedRules) {
+    @Test
+    public void shouldValidateCountry() {
+        bicShouldValidateAsExpected("HLFXEXMM", "BIC doesn't contain a valid country ISO code.");
+    }
+    
+    public void bicShouldValidateAsExpected(String bic, String... expectedRules) {
         
         TrackingAgendaEventListener agendaEventListener = new TrackingAgendaEventListener();
         TrackingWorkingMemoryEventListener workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
         ksession.addEventListener(agendaEventListener);
         ksession.addEventListener(workingMemoryEventListener);
         
-        IbanValidationRequest request = new IbanValidationRequest(iban);
+        BicValidationRequest request = new BicValidationRequest(bic);
         
         List<Object> facts = new ArrayList<Object>();
         facts.add(request);
         
         ksession.execute(facts);
         
-        IbanValidationResult result = new IbanValidationResult();
+        BicValidationResult result = new BicValidationResult();
         result.addAnnotations(request.getAnnotations());
         
-        List<ValidationAnnotation> annotations = result.getAnnotations();        
-        for (ValidationAnnotation annotation : annotations) {
+        List<PaymentValidationAnnotation> annotations = result.getAnnotations();        
+        for (PaymentValidationAnnotation annotation : annotations) {
             System.out.println(annotation.toString());
         }
         

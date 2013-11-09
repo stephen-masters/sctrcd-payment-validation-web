@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.payment;
 
 import com.sctrcd.payments.facts.Payment;
 

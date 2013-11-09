@@ -1,8 +1,11 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.iban;
 
 import org.junit.Test;
 
 import com.sctrcd.payments.validation.ValidationResult;
+import com.sctrcd.payments.validation.iban.IbanMod97Check;
+import com.sctrcd.payments.validation.iban.IbanValidator;
+import com.sctrcd.payments.validation.iban.SimpleIbanValidator;
 
 import static org.junit.Assert.*;
 
@@ -74,7 +77,7 @@ public class SimpleIbanValidatorTest {
     @Test
     public final void shouldAcceptValidIbans() {
         for (String iban : SimpleIbanValidatorTest.validIbans) {
-            assertTrue(Mod97Check.isValid(iban));
+            assertTrue(IbanMod97Check.isValid(iban));
             ValidationResult result = validator.validateIban(iban);
             assertTrue(result.isValid());
         }
@@ -83,7 +86,7 @@ public class SimpleIbanValidatorTest {
     @Test
     public final void shouldRejectInvalidIbans() {
         for (String iban : SimpleIbanValidatorTest.invalidIbans) {
-            assertFalse(Mod97Check.isValid(iban));
+            assertFalse(IbanMod97Check.isValid(iban));
             ValidationResult result = validator.validateIban(iban);
             assertFalse(result.isValid());
         }

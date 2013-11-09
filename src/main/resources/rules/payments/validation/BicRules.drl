@@ -1,0 +1,92 @@
+package sctrcd.payments.rules
+
+import com.sctrcd.payments.facts.*
+
+global java.util.List countryList;
+
+
+/**
+ * A number of detail rules only really need to fire if the BIC provided 
+ * follows a valid structure. i.e. There's no point in validating the 
+ * country if the first 2 chars are not letters. Therefore this fact is 
+ * inserted by a structure check rule so that subsequent rules just match 
+ * on its existence rather than performing their own structural validation. 
+ */
+declare WellStructuredBic
+    bic: String
+end
+
+
+rule "Trigger BIC validation."
+    no-loop
+when
+    $req: PaymentValidationRequest($payment:payment, payment.bic != null)
+    not BicValidationRequest(bic == $payment.bic)
+then
+   insert( new BicValidationRequest($payment.getBic()) );
+end
+
+
+/**
+ * A Business Identifier Code (BIC), also known as a BIC or SWIFT-BIC,
+ * is a format defined by ISO 9362:2009.
+ *
+ * Ref: http://en.wikipedia.org/wiki/ISO_9362
+ *
+ * The code is 8 or 11 characters long, made up of:
+ * <pre>
+ *     4 letters: The Institution code or Bank code.
+ *                DEUT is Deutsche Bank.
+ *     2 letters: The ISO 3166-1 country code.
+ *     2 letters or digits: Location code.
+ *         Conventions for 2nd character:
+ *             0 - Typically a test BIC.
+ *             1 - A passive participant in the SWIFT network.
+ *             2 - Typically a reverse billing BIC where the recipient pays for the message.
+ *     3 letters or digits: Branch code. Optional "XXX" for primary office.
+ * </pre>   
+ * Where an 8-digit code is given, it may be assumed that it
+ * refers to the primary office.
+ */
+rule "BIC follows ISO 9362 structure."
+    salience 500
+    no-loop
+when
+    $req: BicValidationRequest(
+        $bic:bic matches "[a-zA-Z]{6}([0-9a-zA-Z]{2}|[0-9a-zA-Z]{5})"
+    )
+then
+    insertLogical( new WellStructuredBic($bic) );
+end
+
+
+rule "BIC doesn't follow ISO 9362 structure."
+    salience 100 // Less than that of rule: "BIC follows ISO 9362 structure."
+    no-loop
+when
+    $req: BicValidationRequest($bic: bic)
+    not $wsr: WellStructuredBic(bic == $bic)
+then
+    insertLogical( new PaymentValidationAnnotation(
+        drools.getRule().getName(),
+        AnnotationLevel.REJECT, 
+        "The BIC doesn't follow the standard ISO 9362 structure.", 
+        PaymentAttribute.bic));
+end
+
+
+rule "BIC doesn't contain a valid country ISO code."
+    salience 100 // Less than that of rule: "BIC follows ISO 9362 structure."
+    no-loop
+when
+    $wsr: WellStructuredBic($bic:bic) // Ensures that BIC is of sufficient length to substring.
+    $req: BicValidationRequest(bic == $bic, $country:bic.substring(4, 6))
+    not Country(isoCode == $country) from countryList
+then
+    insertLogical( new PaymentValidationAnnotation(
+        drools.getRule().getName(),
+        AnnotationLevel.REJECT, 
+        "The BIC does not contain a valid 2-character country code. '" + $country + "' is not a country."), 
+        PaymentAttribute.bic);
+end
+

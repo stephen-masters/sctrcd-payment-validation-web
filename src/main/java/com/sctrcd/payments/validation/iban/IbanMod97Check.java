@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.iban;
 
 import java.math.BigInteger;
 
@@ -31,12 +31,12 @@ import java.math.BigInteger;
  * 
  * @author Stephen Masters
  */
-public class Mod97Check {
+public class IbanMod97Check {
 	
 	/**
 	 * Default constructor is private to prevent instantiation.
 	 */
-	private Mod97Check() {
+	private IbanMod97Check() {
 	}
 
     /**

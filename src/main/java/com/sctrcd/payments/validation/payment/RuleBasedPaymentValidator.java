@@ -1,4 +1,4 @@
-package com.sctrcd.payments.validation;
+package com.sctrcd.payments.validation.payment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,22 +16,29 @@ import com.sctrcd.drools.util.TrackingAgendaEventListener;
 import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
 import com.sctrcd.payments.facts.Country;
-import com.sctrcd.payments.facts.IbanValidationRequest;
+import com.sctrcd.payments.facts.Payment;
+import com.sctrcd.payments.facts.PaymentValidationRequest;
 
 /**
  * 
  */
-@Service("ruleBasedIbanValidator")
-public class RuleBasedIbanValidator implements IbanValidator {
+@Service("ruleBasedPaymentValidator")
+public class RuleBasedPaymentValidator implements PaymentValidator {
 
     private KnowledgeBase kbase;
     
     public final List<Country> countries = new ArrayList<Country>();
     
-    public RuleBasedIbanValidator() {
+    public RuleBasedPaymentValidator() {
         this.kbase = DroolsUtil.createKnowledgeBase(
                 new DroolsResource[]{ 
-                        new DroolsResource("rules/payments/validation/iban/IbanRules.drl", 
+                        new DroolsResource("rules/payments/validation/IbanRules.drl", 
+                                ResourcePathType.CLASSPATH, 
+                                ResourceType.DRL),
+                        new DroolsResource("rules/payments/validation/BicRules.drl", 
+                                ResourcePathType.CLASSPATH, 
+                                ResourceType.DRL),
+                        new DroolsResource("rules/payments/validation/PaymentRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
                 }, 
@@ -40,9 +47,9 @@ public class RuleBasedIbanValidator implements IbanValidator {
             countries.add(new Country(c.isoCode, c.name));
         }
     }
-        
+    
 	@Override
-	public IbanValidationResult validateIban(String iban) {
+	public FxPaymentValidationResult validatePayment(Payment payment) {
 	    StatelessKnowledgeSession ksession = kbase.newStatelessKnowledgeSession();
 	    
 	    ksession.setGlobal("countryList", countries);
@@ -54,15 +61,15 @@ public class RuleBasedIbanValidator implements IbanValidator {
 	    ksession.addEventListener(agendaEventListener);
 	    ksession.addEventListener(workingMemoryEventListener);
 	    
-	    IbanValidationRequest request = new IbanValidationRequest(iban); 
+	    PaymentValidationRequest request = new PaymentValidationRequest(payment);
+	    request.setPayment(payment);
 	    
 	    List<Object> facts = new ArrayList<Object>();
 	    facts.add(request);
 	    
 		ksession.execute(facts);
 		
-		IbanValidationResult result = new IbanValidationResult();
-		result.setIban(iban);
+		FxPaymentValidationResult result = new FxPaymentValidationResult();
 		result.addAnnotations(request.getAnnotations());
 		
 		ksession.removeEventListener(agendaEventListener);
