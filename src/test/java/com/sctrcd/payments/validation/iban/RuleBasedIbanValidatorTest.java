@@ -2,10 +2,7 @@ package com.sctrcd.payments.validation.iban;
 
 import java.util.List;
 
-import javax.persistence.PersistenceContext;
-
 import org.junit.Test;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.sctrcd.payments.facts.AnnotationLevel;
 import com.sctrcd.payments.facts.PaymentAttribute;
