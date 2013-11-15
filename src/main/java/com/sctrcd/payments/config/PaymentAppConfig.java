@@ -1,4 +1,4 @@
-package com.sctrcd.payments;
+package com.sctrcd.payments.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

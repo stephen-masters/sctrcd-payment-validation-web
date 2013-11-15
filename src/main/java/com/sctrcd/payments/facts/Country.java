@@ -1,7 +1,12 @@
 package com.sctrcd.payments.facts;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Country {
 
+    @Id
     private String isoCode;
     private String name;
 

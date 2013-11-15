@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import com.sctrcd.payments.config.PaymentAppConfig;
 import com.sctrcd.payments.validation.iban.IbanValidator;
 import com.sctrcd.payments.validation.payment.PaymentValidator;
 import com.sctrcd.payments.validation.web.PaymentValidationController;

@@ -73,5 +73,27 @@ public class FactFinder {
         }
         return facts;
     }
+    
+    public Collection<Object> findFacts(final StatefulKnowledgeSession session,
+            final Class<Object> factClass,
+            final BeanPropertyFilter... expectedProperties) {
+
+        ObjectFilter filter = new ObjectFilter() {
+            @Override
+            public boolean accept(Object object) {
+                return object.getClass().equals(factClass);
+            }
+        };
+
+        Collection<FactHandle> factHandles = session.getFactHandles(filter);
+        Collection<Object> facts = new ArrayList<Object>();
+        for (FactHandle handle : factHandles) {
+            Object fact = session.getObject(handle);
+            if (beanMatcher.matches(fact, expectedProperties)) {
+                facts.add(fact);
+            }
+        }
+        return facts;
+    }
 
 }

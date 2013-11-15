@@ -11,7 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sctrcd.payments.PaymentAppConfig;
+import com.sctrcd.payments.config.PaymentAppConfig;
 import com.sctrcd.payments.facts.Payment;
 import com.sctrcd.payments.validation.iban.IbanValidationResult;
 import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
