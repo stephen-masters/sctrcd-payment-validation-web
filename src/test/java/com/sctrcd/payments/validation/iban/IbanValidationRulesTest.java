@@ -3,13 +3,17 @@ package com.sctrcd.payments.validation.iban;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.Command;
 import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
+import org.drools.definition.rule.Query;
 import org.drools.runtime.ExecutionResults;
+import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.StatelessKnowledgeSession;
 import org.drools.runtime.rule.QueryResults;
 import org.drools.runtime.rule.QueryResultsRow;
@@ -22,6 +26,7 @@ import com.sctrcd.drools.util.ResourcePathType;
 import com.sctrcd.drools.util.TrackingAgendaEventListener;
 import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
+import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
 import com.sctrcd.payments.facts.IbanValidationRequest;
 import com.sctrcd.payments.facts.PaymentValidationAnnotation;
@@ -31,12 +36,16 @@ public class IbanValidationRulesTest {
 
     private KnowledgeBase kbase;
     StatelessKnowledgeSession ksession;
+    StatefulKnowledgeSession statefulSession;
     
     public final List<Country> countries = new ArrayList<Country>();
     
     public IbanValidationRulesTest() {
         this.kbase = DroolsUtil.createKnowledgeBase(
                 new DroolsResource[]{ 
+                        new DroolsResource("rules/payments/validation/Validation.drl", 
+                                ResourcePathType.CLASSPATH, 
+                                ResourceType.DRL),
                         new DroolsResource("rules/payments/validation/IbanRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
@@ -60,7 +69,7 @@ public class IbanValidationRulesTest {
 
     @Test
     public void shouldRejectForInvalidMod97() {
-        ibanShouldValidateAsExpected("ES050 217009945", "IBAN failed the Mod-97 checksum test.");
+        shouldValidateWithStatefulSession("ES050 217009945", "IBAN failed the Mod-97 checksum test.");
     }
     
     @Test
@@ -76,30 +85,26 @@ public class IbanValidationRulesTest {
         ibanShouldValidateAsExpected("GB29 NWB0 6016 1331 9268 19", "IBAN is for UK, but doesn't have BBAN structure.");
     }
     
-    public void ibanShouldValidateAsExpected(String iban, String... expectedRules) {
+    void ibanShouldValidateAsExpected(String iban, String... expectedRules) {
         
         TrackingAgendaEventListener agendaEventListener = new TrackingAgendaEventListener();
         TrackingWorkingMemoryEventListener workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
         ksession.addEventListener(agendaEventListener);
         ksession.addEventListener(workingMemoryEventListener);
         
-        IbanValidationRequest request = new IbanValidationRequest(iban);
-        
-        List<Object> facts = new ArrayList<Object>();
-        facts.add(request);
-        
-        @SuppressWarnings("unchecked")
-        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
-        
-        IbanValidationResult result = new IbanValidationResult();
-        result.setIban(iban);
+        List<Command> cmds = new ArrayList<Command>();
+        cmds.add(CommandFactory.newInsert(new IbanValidationRequest(iban), "request"));
+        cmds.add(CommandFactory.newQuery("annotations", "annotations"));
+
+        ExecutionResults results = ksession.execute(CommandFactory.newBatchExecution(cmds));
         
         QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
+        System.out.println("Found [" + queryResults.size() + "]");
+        
         List<PaymentValidationAnnotation> annotations = new ArrayList<>();
         for (QueryResultsRow row : queryResults) {
             annotations.add((PaymentValidationAnnotation) row.get("annotation"));
         }
-        result.addAnnotations(annotations);
         
         assertFalse("There should not be any annotations if there is no expected message.", 
                     (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);
@@ -112,6 +117,44 @@ public class IbanValidationRulesTest {
         
         ksession.removeEventListener(agendaEventListener);
         ksession.removeEventListener(workingMemoryEventListener);
+    }
+    
+    void shouldValidateWithStatefulSession(String iban, String... expectedRules) {
+        statefulSession = kbase.newStatefulKnowledgeSession();
+        
+        TrackingAgendaEventListener agendaEventListener = new TrackingAgendaEventListener();
+        TrackingWorkingMemoryEventListener workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
+        
+        statefulSession.addEventListener(agendaEventListener);
+        statefulSession.addEventListener(workingMemoryEventListener);
+        
+        statefulSession.setGlobal("countryList", countries);
+        
+        statefulSession.insert(new IbanValidationRequest(iban));
+        
+        statefulSession.fireAllRules();
+        
+        QueryResults queryResults = statefulSession.getQueryResults("annotations");
+        
+        System.out.println("Found [" + queryResults.size() + "]");
+        
+        List<PaymentValidationAnnotation> annotations = new ArrayList<>();
+        for (QueryResultsRow row : queryResults) {
+            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
+        }
+        
+        assertFalse("There should not be any annotations if there is no expected message.", 
+                (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);
+    
+        System.out.println(agendaEventListener.activationsToString());
+        
+        for (String ruleName : expectedRules) {
+            assertTrue("Rule [" + ruleName + "] should have fired.", agendaEventListener.isRuleFired(ruleName));
+        }
+        
+        statefulSession.removeEventListener(agendaEventListener);
+        statefulSession.removeEventListener(workingMemoryEventListener);
+        statefulSession.dispose();
     }
 
 }

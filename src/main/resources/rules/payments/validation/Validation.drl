@@ -53,6 +53,13 @@ query "rejection annotations"
 end
 
 /**
+ * If a Rejected fact exists, then the request has been rejected.
+ */
+query "rejected"
+    annotation: Rejected()
+end
+
+/**
  * If any annotations exist which reject a request, then that request can be 
  * considered to be rejected. Insert a "Rejected" fact to indicate this.
  */
@@ -61,9 +68,8 @@ when
     $ann: PaymentValidationAnnotation(
         level == AnnotationLevel.REJECT
     )
-    not exists Rejected()
 then
-    insertLogical( new Rejected() )
+    insertLogical( new Rejected() );
 end
 
 /**
@@ -72,20 +78,21 @@ end
 rule "Define most severe annotation if none exists"
 when
     $ann: PaymentValidationAnnotation()
-    not exists MostSevereAnnotation()
+    not MostSevereAnnotation()
 then 
-    insert( new MostSevereAnnotation( $ann.getLevel(), $ann ) )
+    insert( new MostSevereAnnotation( $ann.getLevel(), $ann ) );
 end
 
 rule "Update most severe annotation if any annotation is more severe"
 when
     $sev: MostSevereAnnotation()
     $ann: PaymentValidationAnnotation(
-        $level: level.ordinal() > $sev.level.ordinal()
+        $level: level, 
+        level.ordinal() > $sev.level.ordinal()
     )
 then
     modify ($sev) {
-        setLevel($level)
+        setLevel($level),
         setAnnotation($ann)
     }
 end

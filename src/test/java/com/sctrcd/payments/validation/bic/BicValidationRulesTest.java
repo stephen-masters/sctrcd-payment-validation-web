@@ -3,19 +3,15 @@ package com.sctrcd.payments.validation.bic;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
 import org.drools.command.Command;
 import org.drools.command.CommandFactory;
-import org.drools.command.runtime.rule.InsertElementsCommand;
 import org.drools.conf.EventProcessingOption;
 import org.drools.runtime.ExecutionResults;
 import org.drools.runtime.StatelessKnowledgeSession;
-import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResults;
 import org.drools.runtime.rule.QueryResultsRow;
 import org.junit.Before;
@@ -30,7 +26,6 @@ import com.sctrcd.payments.enums.CountryEnum;
 import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
 import com.sctrcd.payments.facts.PaymentValidationAnnotation;
-import com.sctrcd.payments.validation.bic.BicValidationResult;
 
 /**
  * A Business Identifier Code (BIC), also known as a BIC or SWIFT-BIC, is a
@@ -110,35 +105,20 @@ public class BicValidationRulesTest {
         ksession.addEventListener(agendaEventListener);
         ksession.addEventListener(workingMemoryEventListener);
         
-        BicValidationRequest request = new BicValidationRequest(bic);
+        List<Command> cmds = new ArrayList<Command>();
+        cmds.add(CommandFactory.newInsert(new BicValidationRequest(bic), "request"));
+        cmds.add(CommandFactory.newQuery("annotations", "annotations"));
         
-        
-        Command cmd = CommandFactory.newInsertElements( Arrays.asList( 
-                new Cheese( "stilton" ),
-                new Cheese( "brie" ),
-                new Cheese( "cheddar" )
-         ));
-        ExecutionResults bresults = ksession.execute( cmd );
-        
-        
-        //Command<Collection<FactHandle>> cmd = CommandFactory.newInsertElements(Arrays.asList(request));
-                
-        //ExecutionResults results = (ExecutionResults) ksession.execute(cmd);
-        
-        Collection<FactHandle> results = ksession.execute(cmd);
-        
-        BicValidationResult result = new BicValidationResult();
-        result.setBic(bic);
+        ExecutionResults results = ksession.execute(CommandFactory.newBatchExecution(cmds));
 
-//        QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
-//        List<PaymentValidationAnnotation> annotations = new ArrayList<>();
-//        for (QueryResultsRow row : queryResults) {
-//            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
-//        }
-//        result.addAnnotations(annotations);
-//        
-//        assertFalse("There should not be any annotations if there is no expected message.", 
-//                    (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);
+        QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
+        List<PaymentValidationAnnotation> annotations = new ArrayList<>();
+        for (QueryResultsRow row : queryResults) {
+            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
+        }
+
+        assertFalse("There should not be any annotations if there is no expected message.", 
+                    (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);
         
         System.out.println(agendaEventListener.activationsToString());
         

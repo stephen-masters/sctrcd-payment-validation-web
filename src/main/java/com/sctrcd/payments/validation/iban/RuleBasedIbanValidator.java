@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.Command;
 import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
 import org.drools.runtime.ExecutionResults;
@@ -69,16 +70,18 @@ public class RuleBasedIbanValidator implements IbanValidator {
 	    ksession.addEventListener(agendaEventListener);
 	    ksession.addEventListener(workingMemoryEventListener);
 	    
-	    IbanValidationRequest request = new IbanValidationRequest(iban); 
-	    
-	    List<Object> facts = new ArrayList<Object>();
-	    facts.add(request);
-	    
-	    @SuppressWarnings("unchecked")
-        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
+        List<Command> cmds = new ArrayList<Command>();
+        cmds.add(CommandFactory.newInsert(new IbanValidationRequest(iban), "request"));
+        cmds.add(CommandFactory.newQuery("annotations", "annotations"));
+        cmds.add(CommandFactory.newQuery("rejected", "rejected"));
+        
+        ExecutionResults results = ksession.execute(CommandFactory.newBatchExecution(cmds));
 	    
 	    IbanValidationResult result = new IbanValidationResult();
 		result.setIban(iban);
+		
+		QueryResults rejected = ( QueryResults ) results.getValue( "rejected" );
+		result.setValid(rejected.size() > 0);
 		
 		QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
 		List<PaymentValidationAnnotation> annotations = new ArrayList<>();

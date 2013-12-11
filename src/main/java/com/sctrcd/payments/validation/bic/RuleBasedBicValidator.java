@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.Command;
 import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
 import org.drools.runtime.ExecutionResults;
@@ -62,13 +63,10 @@ public class RuleBasedBicValidator implements BicValidator {
 	    ksession.addEventListener(agendaEventListener);
 	    ksession.addEventListener(workingMemoryEventListener);
 	    
-	    BicValidationRequest request = new BicValidationRequest(bic); 
+	    List<Command> cmds = new ArrayList<Command>();
+	    cmds.add(CommandFactory.newInsert(new BicValidationRequest(bic), "request"));
 	    
-	    List<Object> facts = new ArrayList<Object>();
-	    facts.add(request);
-	    
-	    @SuppressWarnings("unchecked")
-        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
+	    ExecutionResults results = ksession.execute(CommandFactory.newBatchExecution(cmds));
 		
 		BicValidationResult result = new BicValidationResult();
 		result.setBic(bic);
