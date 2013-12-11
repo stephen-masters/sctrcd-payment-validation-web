@@ -1,6 +1,6 @@
 package com.sctrcd.payments.facts;
 
-public class PaymentValidationRequest extends ValidationRequest {
+public class PaymentValidationRequest {
 
     private Payment payment;
 

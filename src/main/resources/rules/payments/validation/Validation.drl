@@ -1,0 +1,91 @@
+package sctrcd.payments.rules
+
+import com.sctrcd.payments.facts.*
+
+
+/**
+ * Common DRL rules and queries relating to validation. These will be used by
+ * validators which follow the pattern of inserting annotations.
+ * 
+ * @author Stephen Masters
+ */
+
+declare Rejected
+end
+
+declare MostSevereAnnotation
+    level: AnnotationLevel
+    annotation: PaymentValidationAnnotation
+end
+
+/**
+ * Gather up all payment validation annotations.
+ */
+query "annotations"
+    annotation: PaymentValidationAnnotation()
+end
+
+/**
+ * Gather up all payment validation rejection annotations.
+ */
+query "info annotations"
+    annotation: PaymentValidationAnnotation(
+        level == AnnotationLevel.INFO
+    )
+end
+
+/**
+ * Gather up all payment validation rejection annotations.
+ */
+query "warning annotations"
+    annotation: PaymentValidationAnnotation(
+        level == AnnotationLevel.WARN
+    )
+end
+
+/**
+ * Gather up all payment validation rejection annotations.
+ */
+query "rejection annotations"
+    annotation: PaymentValidationAnnotation(
+        level == AnnotationLevel.REJECT
+    )
+end
+
+/**
+ * If any annotations exist which reject a request, then that request can be 
+ * considered to be rejected. Insert a "Rejected" fact to indicate this.
+ */
+rule "Reject if rejection annotation exists"
+when
+    $ann: PaymentValidationAnnotation(
+        level == AnnotationLevel.REJECT
+    )
+    not exists Rejected()
+then
+    insertLogical( new Rejected() )
+end
+
+/**
+ * 
+ */
+rule "Define most severe annotation if none exists"
+when
+    $ann: PaymentValidationAnnotation()
+    not exists MostSevereAnnotation()
+then 
+    insert( new MostSevereAnnotation( $ann.getLevel(), $ann ) )
+end
+
+rule "Update most severe annotation if any annotation is more severe"
+when
+    $sev: MostSevereAnnotation()
+    $ann: PaymentValidationAnnotation(
+        $level: level.ordinal() > $sev.level.ordinal()
+    )
+then
+    modify ($sev) {
+        setLevel($level)
+        setAnnotation($ann)
+    }
+end

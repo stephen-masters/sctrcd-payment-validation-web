@@ -4,7 +4,6 @@ import com.sctrcd.payments.facts.*
 
 global java.util.List countryList;
 
-
 /**
  * A number of detail rules only really need to fire if the BIC provided 
  * follows a valid structure. i.e. There's no point in validating the 
@@ -17,13 +16,14 @@ declare WellStructuredBic
 end
 
 
-rule "Trigger BIC validation."
-    no-loop
-when
-    $req: PaymentValidationRequest($payment:payment, payment.bic != null)
-    not BicValidationRequest(bic == $payment.bic)
-then
-   insert( new BicValidationRequest($payment.getBic()) );
+/**
+ * Gather up all BIC rejection annotations.
+ */
+query "BIC rejections"
+    annotation: PaymentValidationAnnotation(
+        level == AnnotationLevel.REJECT,
+        attribute == PaymentAttribute.bic
+    )
 end
 
 

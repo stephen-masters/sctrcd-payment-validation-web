@@ -1,6 +1,6 @@
 package com.sctrcd.payments.facts;
 
-public class BicValidationRequest extends ValidationRequest {
+public class BicValidationRequest {
 
     private String bic;
 
@@ -23,11 +23,6 @@ public class BicValidationRequest extends ValidationRequest {
      */
     public void setBic(String bic) {
         this.bic = bic.replace(" ", "");
-    }
-    
-    @Override
-    public void reject(String ruleName, String message) {
-        super.reject(ruleName, message, PaymentAttribute.iban);
     }
     
 }

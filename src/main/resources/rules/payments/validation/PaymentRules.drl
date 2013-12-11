@@ -5,48 +5,22 @@ import com.sctrcd.payments.facts.*
 global java.util.List countryList;
 
 
-rule "Apply any annotation if none have been applied yet"
-    salience -1 // Activate at end of validations to accumulate results.
+rule "Trigger BIC validation."
     no-loop
 when
-    $req: PaymentValidationRequest($payment:payment)
-    $ann: PaymentValidationAnnotation($lvl: level == null)
+    $req: PaymentValidationRequest($payment:payment, payment.bic != null)
+    not BicValidationRequest(bic == $payment.bic)
 then
-    $req.setMostSevereAnnotation($lvl);
-    update( $req );
+   insert( new BicValidationRequest($payment.getBic()) );
 end
 
 
-rule "Derive most severe annotation"
-    salience -1 // Activate at end of validations to accumulate results.
-    no-loop
+rule "Trigger IBAN validation."
 when
-    $req: PaymentValidationRequest($payment:payment)
-    $ann: PaymentValidationAnnotation($lvl: level > $req.mostSevereAnnotation)
+    $req: PaymentValidationRequest($payment:payment, payment.iban != null)
+    not IbanValidationRequest(iban == $payment.iban)
 then
-    update( $req );
-end
-
-
-rule "Add annotations to payment request"
-    salience -1 // Activate at end of validations to accumulate results.
-    no-loop
-when
-    $req: PaymentValidationRequest($payment:payment)
-    $ann: PaymentValidationAnnotation()
-then
-    $req.addAnnotation($ann);
-    // Note that we don't update the request. If we do, then we trigger 
-    // re-evaluation of the fact, and create an infinite loop.
-end
-
-
-rule "Reject if there is a rejection annotation"
-    salience -1 // Activate at end of validations to accumulate results.
-    no-loop
-when
-    $req: PaymentValidationRequest($payment:payment, !valid, mostSevereAnnotation == AnnotationLevel.REJECT)
-then
-    $req.setValid(false);
-    update( $req );
+    insert(
+        new IbanValidationRequest($payment.getIban())
+    );
 end

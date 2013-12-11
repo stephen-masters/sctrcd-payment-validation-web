@@ -41,7 +41,7 @@ public class SimpleIbanValidator implements IbanValidator {
      * Check that the country code is for a valid country and that the IBAN
      * passes a MOD-97 check.
      * 
-     * @see{Mod97IbanValidator for details of the MOD-97 check.
+     * See {@link Mod97IbanValidator} for details of the MOD-97 check.
      */
     public IbanValidationResult validateIban(String iban) {
         IbanValidationResult result = new IbanValidationResult(iban, true);

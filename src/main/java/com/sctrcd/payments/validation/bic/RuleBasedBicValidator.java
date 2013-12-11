@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
+import org.drools.runtime.ExecutionResults;
 import org.drools.runtime.StatelessKnowledgeSession;
+import org.drools.runtime.rule.QueryResults;
+import org.drools.runtime.rule.QueryResultsRow;
 import org.springframework.stereotype.Service;
 
 import com.sctrcd.drools.util.DroolsResource;
@@ -17,6 +21,7 @@ import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
 import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 
 /**
  * 
@@ -30,7 +35,10 @@ public class RuleBasedBicValidator implements BicValidator {
     
     public RuleBasedBicValidator() {
         this.kbase = DroolsUtil.createKnowledgeBase(
-                new DroolsResource[]{ 
+                new DroolsResource[]{
+                        new DroolsResource("rules/payments/validation/Validation.drl", 
+                                ResourcePathType.CLASSPATH, 
+                                ResourceType.DRL),
                         new DroolsResource("rules/payments/validation/BicRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
@@ -59,11 +67,18 @@ public class RuleBasedBicValidator implements BicValidator {
 	    List<Object> facts = new ArrayList<Object>();
 	    facts.add(request);
 	    
-		ksession.execute(facts);
+	    @SuppressWarnings("unchecked")
+        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
 		
 		BicValidationResult result = new BicValidationResult();
 		result.setBic(bic);
-		result.addAnnotations(request.getAnnotations());
+
+		QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
+        List<PaymentValidationAnnotation> annotations = new ArrayList<>();
+        for (QueryResultsRow row : queryResults) {
+            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
+        }
+        result.addAnnotations(annotations);
 		
 		ksession.removeEventListener(agendaEventListener);
 		ksession.removeEventListener(workingMemoryEventListener);

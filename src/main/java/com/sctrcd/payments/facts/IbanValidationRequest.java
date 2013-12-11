@@ -1,6 +1,6 @@
 package com.sctrcd.payments.facts;
 
-public class IbanValidationRequest extends ValidationRequest {
+public class IbanValidationRequest {
 
     private String iban;
 
@@ -23,11 +23,6 @@ public class IbanValidationRequest extends ValidationRequest {
      */
     public void setIban(String iban) {
         this.iban = iban.replace(" ", "");
-    }
-    
-    @Override
-    public void reject(String ruleName, String message) {
-        super.reject(ruleName, message, PaymentAttribute.iban);
     }
     
 }

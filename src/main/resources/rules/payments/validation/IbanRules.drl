@@ -6,14 +6,14 @@ import com.sctrcd.payments.validation.iban.IbanMod97Check
 global java.util.List countryList;
 
 
-rule "Trigger IBAN validation."
-when
-    $req: PaymentValidationRequest($payment:payment, payment.iban != null)
-    not IbanValidationRequest(iban == $payment.iban)
-then
-    insert(
-        new IbanValidationRequest($payment.getIban())
-    );
+/**
+ * Gather up all IBAN rejection annotations.
+ */
+query "IBAN rejections"
+    annotation: PaymentValidationAnnotation(
+        level == AnnotationLevel.REJECT,
+        attribute == PaymentAttribute.iban
+    )
 end
 
 
@@ -90,41 +90,3 @@ then
     );
 end
 
-
-rule "Add annotations to IBAN request"
-    salience -1 // Activate at end of validations to accumulate results.
-    no-loop
-when
-    $req: IbanValidationRequest()
-    $ann: PaymentValidationAnnotation(attribute == PaymentAttribute.iban)
-then
-    $req.addAnnotation($ann);
-    // Note that we don't update the request. If we do, then we trigger 
-    // re-evaluation of the fact, and create an infinite loop.
-end
-
-
-rule "Derive most severe IBAN annotation"
-    salience -1 // Activate at end of validations to accumulate results.
-when
-    $req: IbanValidationRequest()
-    $ann: PaymentValidationAnnotation(
-        attribute == PaymentAttribute.iban, 
-        $lvl: level, 
-        $req.mostSevereAnnotation == null || level.ordinal() > $req.mostSevereAnnotation.ordinal()
-    )
-then
-    $req.setMostSevereAnnotation($lvl);
-    update( $req );
-end
-
-
-rule "Reject IBAN request if there is an IBAN rejection annotation"
-    salience -1 // Activate at end of validations to accumulate results.
-    no-loop
-when
-    $req: IbanValidationRequest(valid == true, mostSevereAnnotation == AnnotationLevel.REJECT)
-then
-    $req.setValid(false);
-    update( $req );
-end

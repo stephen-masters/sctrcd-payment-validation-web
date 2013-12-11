@@ -7,8 +7,12 @@ import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
+import org.drools.runtime.ExecutionResults;
 import org.drools.runtime.StatelessKnowledgeSession;
+import org.drools.runtime.rule.QueryResults;
+import org.drools.runtime.rule.QueryResultsRow;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -84,15 +88,18 @@ public class IbanValidationRulesTest {
         List<Object> facts = new ArrayList<Object>();
         facts.add(request);
         
-        ksession.execute(facts);
+        @SuppressWarnings("unchecked")
+        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
         
         IbanValidationResult result = new IbanValidationResult();
-        result.addAnnotations(request.getAnnotations());
+        result.setIban(iban);
         
-        List<PaymentValidationAnnotation> annotations = result.getAnnotations();        
-        for (PaymentValidationAnnotation annotation : annotations) {
-            System.out.println(annotation.toString());
+        QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
+        List<PaymentValidationAnnotation> annotations = new ArrayList<>();
+        for (QueryResultsRow row : queryResults) {
+            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
         }
+        result.addAnnotations(annotations);
         
         assertFalse("There should not be any annotations if there is no expected message.", 
                     (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);

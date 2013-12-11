@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.drools.KnowledgeBase;
 import org.drools.builder.ResourceType;
+import org.drools.command.CommandFactory;
 import org.drools.conf.EventProcessingOption;
+import org.drools.runtime.ExecutionResults;
 import org.drools.runtime.StatelessKnowledgeSession;
+import org.drools.runtime.rule.QueryResults;
+import org.drools.runtime.rule.QueryResultsRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,9 +23,11 @@ import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.payments.enums.CountryEnum;
 import com.sctrcd.payments.facts.Country;
 import com.sctrcd.payments.facts.IbanValidationRequest;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 
 /**
  * 
+ * @author Stephen Masters
  */
 @Service("ruleBasedIbanValidator")
 public class RuleBasedIbanValidator implements IbanValidator {
@@ -35,6 +41,9 @@ public class RuleBasedIbanValidator implements IbanValidator {
     public RuleBasedIbanValidator() {
         this.kbase = DroolsUtil.createKnowledgeBase(
                 new DroolsResource[]{ 
+                        new DroolsResource("rules/payments/validation/Validation.drl", 
+                                ResourcePathType.CLASSPATH, 
+                                ResourceType.DRL),
                         new DroolsResource("rules/payments/validation/IbanRules.drl", 
                                 ResourcePathType.CLASSPATH, 
                                 ResourceType.DRL)
@@ -65,12 +74,18 @@ public class RuleBasedIbanValidator implements IbanValidator {
 	    List<Object> facts = new ArrayList<Object>();
 	    facts.add(request);
 	    
-		ksession.execute(facts);
-		
-		IbanValidationResult result = new IbanValidationResult();
-		result.setValid(request.isValid());
+	    @SuppressWarnings("unchecked")
+        ExecutionResults results = ksession.execute(CommandFactory.newInsertElements(facts));
+	    
+	    IbanValidationResult result = new IbanValidationResult();
 		result.setIban(iban);
-		result.addAnnotations(request.getAnnotations());
+		
+		QueryResults queryResults = ( QueryResults ) results.getValue( "annotations" );
+		List<PaymentValidationAnnotation> annotations = new ArrayList<>();
+        for (QueryResultsRow row : queryResults) {
+            annotations.add((PaymentValidationAnnotation) row.get("annotation"));
+        }
+		result.addAnnotations(annotations);
 		
 		ksession.removeEventListener(agendaEventListener);
 		ksession.removeEventListener(workingMemoryEventListener);

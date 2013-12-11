@@ -19,6 +19,11 @@ import com.sctrcd.payments.validation.iban.IbanValidator;
 import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
 import com.sctrcd.payments.validation.payment.PaymentValidator;
 
+/**
+ * Provides a REST API for validation of international payments.
+ * 
+ * @author Stephen Masters
+ */
 @Controller("paymentValidationController")
 public class PaymentValidationControllerImpl implements
         PaymentValidationController {
