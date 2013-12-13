@@ -42,10 +42,10 @@
     <dependent-module archiveName="dom4j-1.6.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="drools-compiler-5.5.0.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/drools-compiler/5.5.0.Final/drools-compiler-5.5.0.Final.jar">
+    <dependent-module archiveName="drools-compiler-5.6.0.CR1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/drools-compiler/5.6.0.CR1/drools-compiler-5.6.0.CR1.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="drools-core-5.5.0.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/drools-core/5.5.0.Final/drools-core-5.5.0.Final.jar">
+    <dependent-module archiveName="drools-core-5.6.0.CR1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/drools-core/5.6.0.CR1/drools-core-5.6.0.CR1.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
     <dependent-module archiveName="ecj-3.5.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/eclipse/jdt/core/compiler/ecj/3.5.1/ecj-3.5.1.jar">
@@ -111,16 +111,19 @@
     <dependent-module archiveName="jstl-1.2.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/javax/servlet/jstl/1.2/jstl-1.2.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="knowledge-api-5.5.0.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/knowledge-api/5.5.0.Final/knowledge-api-5.5.0.Final.jar">
+    <dependent-module archiveName="knowledge-api-5.6.0.CR1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/knowledge-api/5.6.0.CR1/knowledge-api-5.6.0.CR1.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="knowledge-internal-api-5.5.0.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/knowledge-internal-api/5.5.0.Final/knowledge-internal-api-5.5.0.Final.jar">
+    <dependent-module archiveName="knowledge-internal-api-5.6.0.CR1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/drools/knowledge-internal-api/5.6.0.CR1/knowledge-internal-api-5.6.0.CR1.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
     <dependent-module archiveName="log4j-1.2.16.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="mvel2-2.1.3.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/mvel/mvel2/2.1.3.Final/mvel2-2.1.3.Final.jar">
+    <dependent-module archiveName="mvel2-2.1.5.Final.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/mvel/mvel2/2.1.5.Final/mvel2-2.1.5.Final.jar">
+      <dependency-type>uses</dependency-type>
+    </dependent-module>
+    <dependent-module archiveName="sctrcd-regulator-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/com/sctrcd/sctrcd-regulator/1.0.0-SNAPSHOT/sctrcd-regulator-1.0.0-SNAPSHOT.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
     <dependent-module archiveName="slf4j-api-1.6.4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4.jar">
