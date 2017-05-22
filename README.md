@@ -20,6 +20,6 @@ Assuming that you have run it up in Tomcat, you can now validate IBANs. For inst
 ... will tell you that the IBAN is valid. At least it's valid from the perspective of a 
 Mod-97 check and has the right kind of structure.
 
-    curl http://localhost:9090/iban/validate/GB29NWBK60161331926819
+    curl http://localhost:9090/iban/validate/GB29NWBK60161331926820
 
 ... should tell you that it failed the Mod-97 check.
