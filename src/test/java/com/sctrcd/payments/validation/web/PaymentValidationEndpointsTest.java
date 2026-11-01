@@ -91,6 +91,16 @@ public class PaymentValidationEndpointsTest {
     }
 
     @Test
+    public void acceptsAValidBic() throws Exception {
+        mvc.perform(get("/bic/validate/HLFXESMM"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.bic").value("HLFXESMM"))
+                .andExpect(jsonPath("$.valid").value(true))
+                .andExpect(jsonPath("$.annotations", empty()));
+    }
+
+    @Test
     public void rejectsABicWithTheWrongStructure() throws Exception {
         mvc.perform(get("/bic/validate/HLFXESM"))
                 .andExpect(status().isOk())
@@ -98,7 +108,8 @@ public class PaymentValidationEndpointsTest {
                 .andExpect(jsonPath("$.bic").value("HLFXESM"))
                 .andExpect(jsonPath("$.valid").value(false))
                 .andExpect(jsonPath("$.annotations[0].ruleName").value("ISO_9362 check"))
-                .andExpect(jsonPath("$.annotations[0].level").value("REJECT"));
+                .andExpect(jsonPath("$.annotations[0].level").value("REJECT"))
+                .andExpect(jsonPath("$.annotations[0].attribute").value("bic"));
     }
 
     @Test
@@ -129,6 +140,16 @@ public class PaymentValidationEndpointsTest {
                 .andExpect(jsonPath("$.valid").value(false))
                 .andExpect(jsonPath("$.annotations[*].ruleName", hasItem("BIC doesn't follow ISO 9362 structure.")))
                 .andExpect(jsonPath("$.annotations[*].attribute", hasItem("bic")));
+    }
+
+    @Test
+    public void rejectsAPaymentWithABicForAnUnknownCountry() throws Exception {
+        mvc.perform(get("/payment/validate").param("bic", "HLFXEXMM").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath(
+                        "$.annotations[?(@.ruleName == \"BIC doesn't contain a valid country ISO code.\")].attribute",
+                        hasItem("bic")));
     }
 
     @Test
