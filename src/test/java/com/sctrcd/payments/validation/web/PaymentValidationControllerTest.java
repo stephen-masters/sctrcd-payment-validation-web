@@ -1,25 +1,18 @@
 package com.sctrcd.payments.validation.web;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.sctrcd.payments.config.PaymentAppConfig;
 import com.sctrcd.payments.facts.Payment;
 import com.sctrcd.payments.validation.iban.IbanValidationResult;
 import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
 import com.sctrcd.payments.validation.payment.RuleBasedPaymentValidatorTest;
-import com.sctrcd.payments.validation.web.PaymentValidationController;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.servlet.ModelAndView;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = PaymentAppConfig.class, loader = AnnotationConfigContextLoader.class)
+@SpringBootTest
 public class PaymentValidationControllerTest {
 
     @Autowired(required = true)
@@ -55,9 +48,8 @@ public class PaymentValidationControllerTest {
     public void shouldValidatePayment() {
         Payment payment = new Payment();
         payment.setIban("ES23 0217 0099 47");
-        
+
         FxPaymentValidationResult result = controller.validatePayment(payment);
         assertNotNull(result);
     }
-
 }

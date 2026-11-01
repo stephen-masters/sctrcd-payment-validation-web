@@ -1,9 +1,8 @@
 package com.sctrcd.payments.validation.bic;
 
-import org.springframework.stereotype.Service;
-
-import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 import com.sctrcd.payments.facts.AnnotationLevel;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
+import org.springframework.stereotype.Service;
 
 /**
  * A Business Identifier Code (BIC), also known as a BIC or SWIFT-BIC,
@@ -22,7 +21,7 @@ import com.sctrcd.payments.facts.AnnotationLevel;
  *             1 - A passive participant in the SWIFT network.
  *             2 - Typically a reverse billing BIC where the recipient pays for the message.
  *     3 letters or digits: Branch code. Optional "XXX" for primary office.
- * </pre>   
+ * </pre>
  * Where an 8-digit code is given, it may be assumed that it
  * refers to the primary office.
  */
@@ -32,21 +31,20 @@ public class SimpleBicValidator {
     /**
      * Private constructor to prevent instantiation. Methods are static.
      */
-    public SimpleBicValidator() {
-    }
-    
+    public SimpleBicValidator() {}
+
     /**
      * Validates that the BIC follows the ISO_9362 structure.
      */
     public static boolean isValid(String bic) {
         int len = bic.length();
-        
+
         if (len != 8 || len != 11) {
             return false;
         }
         return bic.toUpperCase().matches("/[a-zA-Z]{6}([0-9a-zA-Z]{2}|[0-9a-zA-Z]{5})/");
     }
-    
+
     /**
      * Validates that the BIC follows the ISO_9362 structure.
      */
@@ -55,11 +53,9 @@ public class SimpleBicValidator {
             return new BicValidationResult(bic, true);
         } else {
             return new BicValidationResult(
-                    bic, true, new PaymentValidationAnnotation(
-                            "ISO_9362 check", 
-                            AnnotationLevel.REJECT, 
-                            "BIC is not valid."));
+                    bic,
+                    true,
+                    new PaymentValidationAnnotation("ISO_9362 check", AnnotationLevel.REJECT, "BIC is not valid."));
         }
     }
-    
 }

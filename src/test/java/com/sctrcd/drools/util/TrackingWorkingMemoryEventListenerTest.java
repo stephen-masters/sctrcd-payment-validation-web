@@ -1,57 +1,60 @@
 package com.sctrcd.drools.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import java.util.Map;
-
-import org.drools.builder.ResourceType;
-import org.drools.event.rule.ObjectInsertedEvent;
-import org.drools.runtime.KnowledgeRuntime;
-import org.drools.runtime.rule.FactHandle;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sctrcd.drools.util.DroolsResource;
-import com.sctrcd.drools.util.KnowledgeEnvironment;
-import com.sctrcd.drools.util.ResourcePathType;
-import com.sctrcd.drools.util.TrackingAgendaEventListener;
-import com.sctrcd.drools.util.TrackingWorkingMemoryEventListener;
 import com.sctrcd.drools.util.testfacts.Customer;
 import com.sctrcd.drools.util.testfacts.Product;
-
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.kie.api.event.rule.ObjectInsertedEvent;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.KieRuntime;
+import org.kie.api.runtime.rule.FactHandle;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A very simple test to confirm that the
  * {@link TrackingWorkingMemoryEventListener} is responding to insertions and
  * retractions.
- * 
+ *
  * @author Stephen Masters
  */
 public class TrackingWorkingMemoryEventListenerTest {
 
     private static Logger log = LoggerFactory.getLogger(TrackingWorkingMemoryEventListenerTest.class);
 
-    private KnowledgeEnvironment kenv = new KnowledgeEnvironment(new DroolsResource[] { 
-		new DroolsResource("sctrcd/drools/util/TrackingWorkingMemoryEventListenerTest.drl", 
-                ResourcePathType.CLASSPATH, 
+    private KnowledgeEnvironment kenv = new KnowledgeEnvironment(new DroolsResource[] {
+        new DroolsResource(
+                "sctrcd/drools/util/TrackingWorkingMemoryEventListenerTest.drl",
+                ResourcePathType.CLASSPATH,
                 ResourceType.DRL)
-        });
+    });
 
-    @Mock private ObjectInsertedEvent objectInsertedEvent;
-    @Mock private KnowledgeRuntime knowledgeRuntime;
+    @Mock
+    private ObjectInsertedEvent objectInsertedEvent;
 
-    @Before
+    @Mock
+    private KieRuntime knowledgeRuntime;
+
+    private AutoCloseable mocks;
+
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
 
-        when(this.objectInsertedEvent.getKnowledgeRuntime()).thenReturn(this.knowledgeRuntime);
-        when(this.objectInsertedEvent.getObject()).thenReturn(new String("Mock object."));
+        when(this.objectInsertedEvent.getKieRuntime()).thenReturn(this.knowledgeRuntime);
+        when(this.objectInsertedEvent.getObject()).thenReturn("Mock object.");
+    }
+
+    @AfterEach
+    public void closeMocks() throws Exception {
+        mocks.close();
     }
 
     @Test
@@ -75,13 +78,13 @@ public class TrackingWorkingMemoryEventListenerTest {
 
     @Test
     public void shouldTrackFilteredUpdates() {
-    
+
         TrackingAgendaEventListener agendaListener = new TrackingAgendaEventListener();
         TrackingWorkingMemoryEventListener workingMemoryListener = new TrackingWorkingMemoryEventListener();
-        
+
         kenv.addEventListener(agendaListener);
         kenv.addEventListener(workingMemoryListener);
-        
+
         FactHandle productHandle = kenv.insert(new Product("Book", 20));
         FactHandle customerHandle = kenv.insert(new Customer("Jimbo"));
 
@@ -92,8 +95,11 @@ public class TrackingWorkingMemoryEventListenerTest {
 
         kenv.fireAllRules();
 
-        assertEquals("There should have been 10 updates, as the count was increments from 20 to 10.", 10, productListener.getUpdates().size());
-        assertEquals("There should only be one customer update.", 1, customerListener.getUpdates().size());
+        assertEquals(
+                10,
+                productListener.getUpdates().size(),
+                "There should have been 10 updates, as the count was increments from 20 to 10.");
+        assertEquals(1, customerListener.getUpdates().size(), "There should only be one customer update.");
 
         // Print the product updates...
         StringBuilder sb = new StringBuilder("The following changes to product were tracked:\n");
@@ -105,7 +111,7 @@ public class TrackingWorkingMemoryEventListenerTest {
         }
         log.info(sb.toString());
     }
-    
+
     @Test
     public void shouldTrackClassFilteredUpdates() {
         TrackingWorkingMemoryEventListener everythingListener = new TrackingWorkingMemoryEventListener();
@@ -118,8 +124,11 @@ public class TrackingWorkingMemoryEventListenerTest {
 
         kenv.fireAllRules();
 
-        assertEquals("There should be 11 updates in total.", 11, everythingListener.getUpdates().size());
-        assertEquals("There should have been 10 updates, as the count was increments from 20 to 10.", 10, productListener.getUpdates().size());
+        assertEquals(11, everythingListener.getUpdates().size(), "There should be 11 updates in total.");
+        assertEquals(
+                10,
+                productListener.getUpdates().size(),
+                "There should have been 10 updates, as the count was increments from 20 to 10.");
 
         // Print the product updates...
         StringBuilder sb = new StringBuilder("The following changes to product were tracked:\n");
@@ -131,5 +140,4 @@ public class TrackingWorkingMemoryEventListenerTest {
         }
         log.info(sb.toString());
     }
-
 }

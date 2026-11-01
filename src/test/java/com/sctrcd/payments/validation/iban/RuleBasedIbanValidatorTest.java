@@ -1,27 +1,20 @@
 package com.sctrcd.payments.validation.iban;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.sctrcd.payments.facts.AnnotationLevel;
 import com.sctrcd.payments.facts.PaymentAttribute;
 import com.sctrcd.payments.validation.ValidationTestHelper;
-import com.sctrcd.payments.validation.iban.IbanMod97Check;
-import com.sctrcd.payments.validation.iban.IbanUtil;
-import com.sctrcd.payments.validation.iban.IbanValidationResult;
-import com.sctrcd.payments.validation.iban.IbanValidator;
-import com.sctrcd.payments.validation.iban.RuleBasedIbanValidator;
-
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link FxPaymentValidator}.
- * 
+ *
  * @author Stephen Masters
  */
 public class RuleBasedIbanValidatorTest {
-	
-	IbanValidator validator = new RuleBasedIbanValidator();
+
+    IbanValidator validator = new RuleBasedIbanValidator();
 
     @Test
     public final void shouldAcceptValidIbans() {
@@ -33,12 +26,12 @@ public class RuleBasedIbanValidatorTest {
             ValidationTestHelper.assertNoRejectionsForAttribute(result.getAnnotations(), PaymentAttribute.iban);
         }
     }
-    
+
     @Test
     public void tmp() {
         assertTrue(AnnotationLevel.REJECT.ordinal() > AnnotationLevel.WARN.ordinal());
     }
-    
+
     @Test
     public final void shouldRejectInvalidIbans() {
         for (String iban : SimpleIbanValidatorTest.invalidIbans) {
@@ -49,5 +42,4 @@ public class RuleBasedIbanValidatorTest {
             ValidationTestHelper.assertAtLeastOneRejectionForAttribute(result.getAnnotations(), PaymentAttribute.iban);
         }
     }
-    
 }

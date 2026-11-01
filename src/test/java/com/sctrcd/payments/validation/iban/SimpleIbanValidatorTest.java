@@ -1,23 +1,19 @@
 package com.sctrcd.payments.validation.iban;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.sctrcd.payments.validation.ValidationResult;
-import com.sctrcd.payments.validation.iban.IbanMod97Check;
-import com.sctrcd.payments.validation.iban.IbanValidator;
-import com.sctrcd.payments.validation.iban.SimpleIbanValidator;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link FxPaymentValidator}.
- * 
+ *
  * @author Stephen Masters
  */
 public class SimpleIbanValidatorTest {
 
-	public static final String[] validIbans = {
-       	"BG29FINV915010EUR0IKFF",
+    public static final String[] validIbans = {
+        "BG29FINV915010EUR0IKFF",
         "ES5702170302862100282783",
         "SK3211000000002612890189",
         "ES23 0217 0099 47",
@@ -57,9 +53,9 @@ public class SimpleIbanValidatorTest {
         "CH93 0076 2011 6238 5295 7",
         "GB29 NWBK 6016 1331 9268 19",
         "TN59 1420 7207 1007 0712 9648"
-	};
-	
-	public static final String[] invalidIbans = {
+    };
+
+    public static final String[] invalidIbans = {
         "IT72C012574030100000000789",
         "ES050 217009945",
         "ES150 217002616",
@@ -70,9 +66,9 @@ public class SimpleIbanValidatorTest {
         "es190217009941",
         "LU36 0029 1534 6005 0000",
         "TN59 1421 7207 1007 0712 9648"
-	};
-	
-	IbanValidator validator = new SimpleIbanValidator();
+    };
+
+    IbanValidator validator = new SimpleIbanValidator();
 
     @Test
     public final void shouldAcceptValidIbans() {
@@ -82,7 +78,7 @@ public class SimpleIbanValidatorTest {
             assertTrue(result.isValid());
         }
     }
-    
+
     @Test
     public final void shouldRejectInvalidIbans() {
         for (String iban : SimpleIbanValidatorTest.invalidIbans) {

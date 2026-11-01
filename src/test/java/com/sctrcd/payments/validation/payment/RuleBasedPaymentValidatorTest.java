@@ -1,19 +1,15 @@
 package com.sctrcd.payments.validation.payment;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.sctrcd.payments.facts.Payment;
 import com.sctrcd.payments.facts.PaymentAttribute;
 import com.sctrcd.payments.validation.ValidationTestHelper;
-import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
-import com.sctrcd.payments.validation.payment.PaymentValidator;
-import com.sctrcd.payments.validation.payment.RuleBasedPaymentValidator;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link FxPaymentValidator}.
- * 
+ *
  * @author Stephen Masters
  */
 public class RuleBasedPaymentValidatorTest {
@@ -61,7 +57,7 @@ public class RuleBasedPaymentValidatorTest {
         // payment *except* for the IBAN.
         assertTrue(result.isValid());
     }
-    
+
     @Test
     public final void shouldAcceptValidBics() {
         Payment payment = new Payment();
@@ -77,7 +73,7 @@ public class RuleBasedPaymentValidatorTest {
         // payment *except* for the IBAN.
         assertTrue(result.isValid());
     }
-    
+
     @Test
     public final void shouldRejectInvalidBics() {
         Payment payment = new Payment();
@@ -85,8 +81,7 @@ public class RuleBasedPaymentValidatorTest {
         FxPaymentValidationResult result = validator.validatePayment(payment);
 
         assertFalse(result.isValid());
-        
+
         ValidationTestHelper.assertAtLeastOneRejectionForAttribute(result.getAnnotations(), PaymentAttribute.bic);
     }
-    
 }

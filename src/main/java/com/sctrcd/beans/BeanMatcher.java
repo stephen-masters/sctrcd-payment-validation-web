@@ -3,7 +3,6 @@ package com.sctrcd.beans;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +15,18 @@ import org.slf4j.LoggerFactory;
  * <pre>
  *     o1.property.toString().equals(filterValue.toString())
  * </pre>
- * 
+ *
  * @author Stephen Masters
  */
 public class BeanMatcher {
-    
+
     private static Logger log = LoggerFactory.getLogger(BeanMatcher.class);
-    
+
     /**
      * Can all key/value pairs in the filters be found in the bean properties?
      * If any filter is not in the bean properties or the value differs, then
      * this will return false.
-     * 
+     *
      * The filters should be defined as an array of String, where each property
      * name/value pair is a String, like so:
      * <pre>
@@ -39,12 +38,12 @@ public class BeanMatcher {
         if (filters.length == 0) return true;
         return matches(bean, parseFilters(filters));
     }
-    
+
     /**
      * Can all key/value pairs in the filters be found in the bean properties?
      * If any filter is not in the bean properties or the value differs, then
      * this will return false.
-     * 
+     *
      * @param bean The bean to examine.
      * @param filters Vararg list of filters.
      * @return True if all the filter properties match on the bean.
@@ -54,20 +53,19 @@ public class BeanMatcher {
         Map<String, Object> filtermap = new HashMap<String, Object>();
         for (BeanPropertyFilter filter : filters) {
             filtermap.put(filter.getPropertyName(), filter.getPropertyValue());
-        }        
+        }
         return matches(bean, filtermap);
     }
-    
+
     /**
      * Can all key/value pairs in the filters be found in the bean properties?
      * If any filter is not in the bean properties or the value differs, then
      * this will return false.
      */
-    @SuppressWarnings("unchecked")
     public boolean matches(Object bean, Map<String, Object> filters) {
         if (filters.size() == 0) return true;
         try {
-            return matches(BeanUtils.describe(bean), filters);
+            return matches(new HashMap<String, Object>(BeanUtils.describe(bean)), filters);
         } catch (IllegalAccessException e) {
             return false;
         } catch (InvocationTargetException e) {
@@ -87,35 +85,34 @@ public class BeanMatcher {
         if (log.isDebugEnabled()) {
             logComparison(beanProperties, filters);
         }
-        for(String key : filters.keySet()) {
-            if (!beanProperties.containsKey(key) 
-                    ||  !isEquivalent(filters.get(key), beanProperties.get(key))) {
+        for (String key : filters.keySet()) {
+            if (!beanProperties.containsKey(key) || !isEquivalent(filters.get(key), beanProperties.get(key))) {
                 return false;
             }
         }
         // None of the filters failed to match, so it must be okay.
         return true;
     }
-    
+
     /**
      * This method will log the bean properties and the filter properties at debug level.
-     *  
+     *
      * @param beanProperties The field names and their values for a bean.
      * @param filters The filters we are looking to match.
      */
     private void logComparison(Map<String, Object> beanProperties, Map<String, Object> filters) {
         StringBuilder filterValues = new StringBuilder();
         StringBuilder beanValues = new StringBuilder();
-        
-        for(String key : filters.keySet()) {
+
+        for (String key : filters.keySet()) {
             filterValues.append(key + "=" + filters.get(key) + ",");
             if (beanProperties.containsKey(key)) {
-                beanValues.append(key + "=" + beanProperties.get(key) + "," );
+                beanValues.append(key + "=" + beanProperties.get(key) + ",");
             } else {
                 beanValues.append("No property.");
             }
         }
-        
+
         log.debug("Matching filters: " + filterValues.toString() + "\nto bean properties:" + beanValues.toString());
     }
 
@@ -139,7 +136,7 @@ public class BeanMatcher {
             return text.substring(0, 1).toLowerCase() + text.substring(1, text.length());
         }
     }
-    
+
     /**
      * Takes an array of <code>String</code> defined like so:
      * <pre>
@@ -153,8 +150,7 @@ public class BeanMatcher {
         for (String filter : filters) {
             String[] keyval = filter.split("=");
             if (keyval.length != 2) {
-                throw new IllegalArgumentException(
-                  "Filter [" + filter + "] does not parse to a key/value pair.");
+                throw new IllegalArgumentException("Filter [" + filter + "] does not parse to a key/value pair.");
             }
             map.put(lowercaseFirstLetter(keyval[0]), keyval[1]);
         }
@@ -173,5 +169,4 @@ public class BeanMatcher {
         if (o1.toString().equals(o2.toString())) return true;
         return false;
     }
-
 }

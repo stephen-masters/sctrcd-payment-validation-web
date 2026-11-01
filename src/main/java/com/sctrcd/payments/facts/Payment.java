@@ -13,25 +13,28 @@ public class Payment {
     private String iban;
     private String bic;
 
-    public Payment() {
-    }
+    public Payment() {}
 
     public Payment(String sellCurrency, String buyCurrency) {
         this.sellCurrency = sellCurrency;
         this.buyCurrency = buyCurrency;
     }
 
-    public Payment(String sellCurrency, String buyCurrency,
-            BigDecimal sellAmount, BigDecimal buyAmount, Leg fixedLeg) {
+    public Payment(String sellCurrency, String buyCurrency, BigDecimal sellAmount, BigDecimal buyAmount, Leg fixedLeg) {
         this.sellCurrency = sellCurrency;
         this.buyCurrency = buyCurrency;
         this.sellAmount = sellAmount;
         this.buyAmount = buyAmount;
         this.fixedLeg = fixedLeg;
     }
-    
-    public Payment(String sellCurrency, String buyCurrency,
-            BigDecimal sellAmount, BigDecimal buyAmount, Leg fixedLeg, BigDecimal rate) {
+
+    public Payment(
+            String sellCurrency,
+            String buyCurrency,
+            BigDecimal sellAmount,
+            BigDecimal buyAmount,
+            Leg fixedLeg,
+            BigDecimal rate) {
         this(sellCurrency, buyCurrency, sellAmount, buyAmount, fixedLeg);
         this.rate = rate;
     }
@@ -81,7 +84,7 @@ public class Payment {
      * requested up front. For instance, if a customer wishes to buy 1000 Euro,
      * the fixed leg is BUY, which indicates that the final sellAmount was
      * derived from buyAmount/rate.
-     * 
+     *
      * @return
      */
     public Leg getFixedLeg() {
@@ -109,7 +112,7 @@ public class Payment {
     }
 
     public enum Leg {
-        SELL, BUY;
+        SELL,
+        BUY;
     }
-
 }

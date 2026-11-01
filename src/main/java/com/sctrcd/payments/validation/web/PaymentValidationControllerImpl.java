@@ -1,5 +1,12 @@
 package com.sctrcd.payments.validation.web;
 
+import com.sctrcd.payments.facts.Payment;
+import com.sctrcd.payments.validation.bic.BicValidationResult;
+import com.sctrcd.payments.validation.bic.SimpleBicValidator;
+import com.sctrcd.payments.validation.iban.IbanValidationResult;
+import com.sctrcd.payments.validation.iban.IbanValidator;
+import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
+import com.sctrcd.payments.validation.payment.PaymentValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sctrcd.payments.facts.Payment;
-import com.sctrcd.payments.validation.bic.BicValidationResult;
-import com.sctrcd.payments.validation.bic.SimpleBicValidator;
-import com.sctrcd.payments.validation.iban.IbanValidationResult;
-import com.sctrcd.payments.validation.iban.IbanValidator;
-import com.sctrcd.payments.validation.payment.FxPaymentValidationResult;
-import com.sctrcd.payments.validation.payment.PaymentValidator;
-
 @Controller("paymentValidationController")
-public class PaymentValidationControllerImpl implements
-        PaymentValidationController {
+public class PaymentValidationControllerImpl implements PaymentValidationController {
 
-    private static Logger log = LoggerFactory
-            .getLogger(PaymentValidationControllerImpl.class);
+    private static Logger log = LoggerFactory.getLogger(PaymentValidationControllerImpl.class);
 
     @Autowired(required = true)
     @Qualifier("ruleBasedPaymentValidator")
@@ -39,10 +36,9 @@ public class PaymentValidationControllerImpl implements
 
     @Override
     @RequestMapping(value = "/bic/validate/{bic}", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
-    BicValidationResult validateBic(@PathVariable String bic) {
+    public @ResponseBody BicValidationResult validateBic(@PathVariable String bic) {
         BicValidationResult result = bicValidator.validate(bic);
-        log.debug("Validated IBAN: " + result.toString());
+        log.debug("Validated BIC: " + result.toString());
         return result;
     }
 
@@ -55,8 +51,7 @@ public class PaymentValidationControllerImpl implements
 
     @Override
     @RequestMapping(value = "/iban/validate/{iban}", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
-    IbanValidationResult validateIban(@PathVariable String iban) {
+    public @ResponseBody IbanValidationResult validateIban(@PathVariable String iban) {
         IbanValidationResult result = ibanValidator.validateIban(iban);
         log.debug("Validated IBAN: " + result.toString());
         return result;
@@ -64,8 +59,7 @@ public class PaymentValidationControllerImpl implements
 
     @Override
     @RequestMapping(value = "/payment/validate", method = RequestMethod.GET, headers = "Accept=application/json")
-    public @ResponseBody
-    FxPaymentValidationResult validatePayment(Payment payment) {
+    public @ResponseBody FxPaymentValidationResult validatePayment(Payment payment) {
         FxPaymentValidationResult result = paymentValidator.validatePayment(payment);
         log.debug("Validated payment: " + result.toString());
         return result;
@@ -94,5 +88,4 @@ public class PaymentValidationControllerImpl implements
     public void setPaymentValidator(PaymentValidator paymentValidator) {
         this.paymentValidator = paymentValidator;
     }
-
 }

@@ -1,30 +1,25 @@
 package com.sctrcd.drools.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.drools.builder.ResourceType;
-import org.drools.runtime.ObjectFilter;
-import org.junit.Test;
-
-import com.sctrcd.drools.util.DroolsResource;
-import com.sctrcd.drools.util.KnowledgeEnvironment;
-import com.sctrcd.drools.util.ResourcePathType;
-
+import org.junit.jupiter.api.Test;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.ObjectFilter;
 
 public class KnowledgeEnvironmentTest {
 
     public static final ObjectFilter MESSAGE_FILTER = new ObjectFilter() {
         public boolean accept(Object object) {
-            return object.getClass().getSimpleName()
-                    .equals("Message");
+            return object.getClass().getSimpleName().equals("Message");
         }
     };
 
     @Test
     public void shouldReloadOnCommand() {
-        KnowledgeEnvironment kenv = new KnowledgeEnvironment(
-                new DroolsResource[] {
-            new DroolsResource("sctrcd/drools/util/KnowledgeEnvironmentTest.drl", ResourcePathType.CLASSPATH, ResourceType.DRL)});
+        KnowledgeEnvironment kenv = new KnowledgeEnvironment(new DroolsResource[] {
+            new DroolsResource(
+                    "sctrcd/drools/util/KnowledgeEnvironmentTest.drl", ResourcePathType.CLASSPATH, ResourceType.DRL)
+        });
 
         assertEquals(0, kenv.getFactHandles(MESSAGE_FILTER).size());
         kenv.insert(new Message("Hello Droolers!"));
@@ -50,5 +45,4 @@ public class KnowledgeEnvironmentTest {
             this.text = text;
         }
     }
-
 }
