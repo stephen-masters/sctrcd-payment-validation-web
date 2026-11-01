@@ -7,7 +7,7 @@ public class BicValidationRequest extends ValidationRequest {
     public BicValidationRequest() {
         super();
     }
-    
+
     public BicValidationRequest(String bic) {
         super();
         this.setBic(bic);
@@ -24,10 +24,9 @@ public class BicValidationRequest extends ValidationRequest {
     public void setBic(String bic) {
         this.bic = bic.replace(" ", "");
     }
-    
+
     @Override
     public void reject(String ruleName, String message) {
         super.reject(ruleName, message, PaymentAttribute.iban);
     }
-    
 }

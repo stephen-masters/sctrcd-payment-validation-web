@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sctrcd.payments.facts.AnnotationLevel;
-
 public abstract class ValidationRequest {
 
     private boolean isValid = true;
@@ -19,7 +17,7 @@ public abstract class ValidationRequest {
     public void setValid(boolean isValid) {
         this.isValid = isValid;
     }
-    
+
     public AnnotationLevel getMostSevereAnnotation() {
         return mostSevereAnnotation;
     }
@@ -35,13 +33,12 @@ public abstract class ValidationRequest {
     public void addAnnotation(PaymentValidationAnnotation annotation) {
         annotations.add(annotation);
     }
-    
+
     public void reject(String ruleName, String message) {
         annotations.add(new PaymentValidationAnnotation(ruleName, AnnotationLevel.REJECT, message));
     }
-    
+
     public void reject(String ruleName, String message, PaymentAttribute attribute) {
         annotations.add(new PaymentValidationAnnotation(ruleName, AnnotationLevel.REJECT, message, attribute));
     }
-    
 }

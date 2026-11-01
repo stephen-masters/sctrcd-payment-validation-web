@@ -1,26 +1,23 @@
 package com.sctrcd.payments.validation;
 
+import com.sctrcd.payments.facts.AnnotationLevel;
+import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import com.sctrcd.payments.facts.PaymentValidationAnnotation;
-import com.sctrcd.payments.facts.AnnotationLevel;
-
 
 public abstract class ValidationResult {
 
     private boolean isValid = true;
     private List<PaymentValidationAnnotation> annotations = new ArrayList<PaymentValidationAnnotation>();
 
-    public ValidationResult() {
-    }
-    
+    public ValidationResult() {}
+
     public ValidationResult(boolean isValid) {
         this.isValid = isValid;
     }
-    
+
     public boolean isValid() {
         return isValid;
     }
@@ -44,14 +41,14 @@ public abstract class ValidationResult {
         this.annotations.add(annotation);
         rejectIfAnnotationRejects(annotation);
     }
-    
+
     public void addAnnotations(Collection<PaymentValidationAnnotation> annotations) {
         this.annotations.addAll(annotations);
         rejectIfAnnotationRejects(annotations);
     }
 
     /**
-     * For every annotation added to the result, 
+     * For every annotation added to the result,
      * @param annotation
      */
     private void rejectIfAnnotationRejects(PaymentValidationAnnotation annotation) {
@@ -59,9 +56,9 @@ public abstract class ValidationResult {
             this.isValid = false;
         }
     }
-    
+
     /**
-     * For every annotation added to the result, 
+     * For every annotation added to the result,
      * @param annotation
      */
     private void rejectIfAnnotationRejects(Collection<PaymentValidationAnnotation> annotations) {
@@ -69,5 +66,4 @@ public abstract class ValidationResult {
             rejectIfAnnotationRejects(ann);
         }
     }
-
 }

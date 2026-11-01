@@ -3,9 +3,9 @@ package com.sctrcd.payments.validation.iban;
 public class IbanFormatter {
 
     /**
-	 * For readability, an IBAN tends to be displayed in uppercase with a space
-	 * after every fourth character.
-	 */
+     * For readability, an IBAN tends to be displayed in uppercase with a space
+     * after every fourth character.
+     */
     public static String printFormat(String iban) {
         String eFormat = IbanUtil.sanitize(iban);
         StringBuilder sb = new StringBuilder();
@@ -17,5 +17,4 @@ public class IbanFormatter {
         }
         return sb.toString();
     }
-	
 }

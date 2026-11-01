@@ -7,7 +7,7 @@ public class IbanValidationRequest extends ValidationRequest {
     public IbanValidationRequest() {
         super();
     }
-    
+
     public IbanValidationRequest(String iban) {
         super();
         this.setIban(iban);
@@ -24,10 +24,9 @@ public class IbanValidationRequest extends ValidationRequest {
     public void setIban(String iban) {
         this.iban = iban.replace(" ", "");
     }
-    
+
     @Override
     public void reject(String ruleName, String message) {
         super.reject(ruleName, message, PaymentAttribute.iban);
     }
-    
 }

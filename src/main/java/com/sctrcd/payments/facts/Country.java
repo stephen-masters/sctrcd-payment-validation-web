@@ -8,10 +8,10 @@ public class Country {
 
     @Id
     private String isoCode;
+
     private String name;
 
-    public Country() {
-    }
+    public Country() {}
 
     public Country(String isoCode, String name) {
         this.isoCode = isoCode;
@@ -33,9 +33,8 @@ public class Country {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String toString() {
         return isoCode + "=" + name;
     }
-
 }

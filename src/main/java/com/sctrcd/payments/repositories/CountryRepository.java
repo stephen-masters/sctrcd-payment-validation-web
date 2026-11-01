@@ -1,9 +1,6 @@
 package com.sctrcd.payments.repositories;
 
+import com.sctrcd.payments.facts.Country;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.sctrcd.payments.facts.Country;
-
-public interface CountryRepository extends JpaRepository<Country, Integer> {
-
-}
+public interface CountryRepository extends JpaRepository<Country, Integer> {}

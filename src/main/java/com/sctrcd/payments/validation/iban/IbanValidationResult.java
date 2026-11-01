@@ -4,7 +4,7 @@ import com.sctrcd.payments.validation.ValidationResult;
 
 /**
  * Encapsulates an IBAN and the result of validating it.
- * 
+ *
  * @author Stephen Masters
  */
 public class IbanValidationResult extends ValidationResult {
@@ -14,12 +14,12 @@ public class IbanValidationResult extends ValidationResult {
     public IbanValidationResult() {
         super();
     }
-    
+
     public IbanValidationResult(String iban) {
         super();
         this.iban = iban;
     }
-    
+
     public IbanValidationResult(String iban, boolean isValid) {
         this(iban);
         this.setValid(isValid);
@@ -32,5 +32,4 @@ public class IbanValidationResult extends ValidationResult {
     public void setIban(String iban) {
         this.iban = iban;
     }
-    
 }

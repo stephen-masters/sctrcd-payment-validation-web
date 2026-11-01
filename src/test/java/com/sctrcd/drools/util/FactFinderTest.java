@@ -9,7 +9,5 @@ public class FactFinderTest {
     @Test
     public void shouldFindFactsBasedOnSimpleName() {
         FactFinder finder = new FactFinder();
-        
     }
-
 }

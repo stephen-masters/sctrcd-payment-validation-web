@@ -3,16 +3,15 @@ package com.sctrcd.drools.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.drools.definition.rule.Rule;
-import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.event.rule.AfterActivationFiredEvent;
+import org.drools.event.rule.DefaultAgendaEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A listener that will track all rule firings in a session.
- * 
+ *
  * @author Stephen Masters
  */
 public class TrackingAgendaEventListener extends DefaultAgendaEventListener {
@@ -34,8 +33,7 @@ public class TrackingAgendaEventListener extends DefaultAgendaEventListener {
         if (ruleMetaDataMap.size() > 0) {
             sb.append("\n  With [" + ruleMetaDataMap.size() + "] meta-data:");
             for (String key : ruleMetaDataMap.keySet()) {
-                sb.append("\n    key=" + key + ", value="
-                        + ruleMetaDataMap.get(key));
+                sb.append("\n    key=" + key + ", value=" + ruleMetaDataMap.get(key));
             }
         }
 
@@ -70,5 +68,4 @@ public class TrackingAgendaEventListener extends DefaultAgendaEventListener {
             return sb.toString();
         }
     }
-
 }
