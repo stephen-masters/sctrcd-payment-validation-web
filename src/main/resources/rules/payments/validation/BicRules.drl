@@ -86,7 +86,20 @@ then
     insertLogical( new PaymentValidationAnnotation(
         drools.getRule().getName(),
         AnnotationLevel.REJECT, 
-        "The BIC does not contain a valid 2-character country code. '" + $country + "' is not a country."), 
-        PaymentAttribute.bic);
+        "The BIC does not contain a valid 2-character country code. '" + $country + "' is not a country.",
+        PaymentAttribute.bic));
+end
+
+
+rule "Add annotations to BIC request"
+    salience -1 // Activate at end of validations to accumulate results.
+    no-loop
+when
+    $req: BicValidationRequest()
+    $ann: PaymentValidationAnnotation(attribute == PaymentAttribute.bic)
+then
+    $req.addAnnotation($ann);
+    // Note that we don't update the request. If we do, then we trigger
+    // re-evaluation of the fact, and create an infinite loop.
 end
 
