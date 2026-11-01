@@ -1,10 +1,10 @@
 package com.sctrcd.drools.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.drools.builder.ResourceType;
-import org.drools.runtime.ObjectFilter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.ObjectFilter;
 
 public class KnowledgeEnvironmentTest {
 

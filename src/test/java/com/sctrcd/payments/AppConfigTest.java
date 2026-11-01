@@ -1,18 +1,14 @@
 package com.sctrcd.payments;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import com.sctrcd.payments.config.PaymentAppConfig;
 import com.sctrcd.payments.validation.iban.IbanValidator;
 import com.sctrcd.payments.validation.payment.PaymentValidator;
 import com.sctrcd.payments.validation.web.PaymentValidationController;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * This test is purely to establish that key beans in the application are
@@ -23,8 +19,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  *
  * @author Stephen Masters
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = PaymentAppConfig.class, loader = AnnotationConfigContextLoader.class)
+@SpringBootTest
 public class AppConfigTest {
 
     @Autowired(required = true)

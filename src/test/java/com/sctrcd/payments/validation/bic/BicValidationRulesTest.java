@@ -1,6 +1,6 @@
 package com.sctrcd.payments.validation.bic;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.sctrcd.drools.util.DroolsResource;
 import com.sctrcd.drools.util.DroolsUtil;
@@ -13,12 +13,12 @@ import com.sctrcd.payments.facts.Country;
 import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 import java.util.ArrayList;
 import java.util.List;
-import org.drools.KnowledgeBase;
-import org.drools.builder.ResourceType;
-import org.drools.conf.EventProcessingOption;
-import org.drools.runtime.StatelessKnowledgeSession;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.kie.api.KieBase;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.StatelessKieSession;
 
 /**
  * A Business Identifier Code (BIC), also known as a BIC or SWIFT-BIC, is a
@@ -45,8 +45,8 @@ import org.junit.Test;
  */
 public class BicValidationRulesTest {
 
-    private KnowledgeBase kbase;
-    StatelessKnowledgeSession ksession;
+    private KieBase kbase;
+    StatelessKieSession ksession;
 
     public final List<Country> countries = new ArrayList<Country>();
 
@@ -62,9 +62,9 @@ public class BicValidationRulesTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
-        ksession = kbase.newStatelessKnowledgeSession();
+        ksession = kbase.newStatelessKieSession();
         ksession.setGlobal("countryList", countries);
     }
 
@@ -108,13 +108,13 @@ public class BicValidationRulesTest {
         }
 
         assertFalse(
-                "There should not be any annotations if there is no expected message.",
-                (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0);
+                (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0,
+                "There should not be any annotations if there is no expected message.");
 
         System.out.println(agendaEventListener.activationsToString());
 
         for (String ruleName : expectedRules) {
-            assertTrue("Rule [" + ruleName + "] should have fired.", agendaEventListener.isRuleFired(ruleName));
+            assertTrue(agendaEventListener.isRuleFired(ruleName), "Rule [" + ruleName + "] should have fired.");
         }
 
         ksession.removeEventListener(agendaEventListener);

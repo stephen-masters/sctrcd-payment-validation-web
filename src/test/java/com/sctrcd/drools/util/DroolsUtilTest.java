@@ -1,15 +1,16 @@
 package com.sctrcd.drools.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.drools.event.rule.ObjectInsertedEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.kie.api.event.rule.ObjectInsertedEvent;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  *
@@ -38,13 +39,15 @@ public class DroolsUtilTest {
     List<Activation> activations;
     List<ObjectInsertedEvent> insertions;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
+    private AutoCloseable mocks;
 
-        when(this.activation_1.getRuleName()).thenReturn(new String("His Rule"));
-        when(this.activation_2.getRuleName()).thenReturn(new String("121 Her Rule"));
-        when(this.activation_3.getRuleName()).thenReturn(new String("54 My Rule"));
+    @BeforeEach
+    public void setUp() {
+        mocks = MockitoAnnotations.openMocks(this);
+
+        when(this.activation_1.getRuleName()).thenReturn("His Rule");
+        when(this.activation_2.getRuleName()).thenReturn("121 Her Rule");
+        when(this.activation_3.getRuleName()).thenReturn("54 My Rule");
 
         activations = new ArrayList<Activation>();
         activations.add(this.activation_1);
@@ -59,6 +62,11 @@ public class DroolsUtilTest {
         insertions.add(insertion_1);
         insertions.add(insertion_2);
         insertions.add(insertion_3);
+    }
+
+    @AfterEach
+    public void closeMocks() throws Exception {
+        mocks.close();
     }
 
     /**

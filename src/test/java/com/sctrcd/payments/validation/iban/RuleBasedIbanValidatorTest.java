@@ -1,11 +1,11 @@
 package com.sctrcd.payments.validation.iban;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.sctrcd.payments.facts.AnnotationLevel;
 import com.sctrcd.payments.facts.PaymentAttribute;
 import com.sctrcd.payments.validation.ValidationTestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@link FxPaymentValidator}.

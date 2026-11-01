@@ -1,6 +1,7 @@
 package com.sctrcd.payments.validation;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.sctrcd.payments.facts.PaymentAttribute;
 import com.sctrcd.payments.facts.PaymentValidationAnnotation;
@@ -15,7 +16,7 @@ public class ValidationTestHelper {
                 return;
             }
         }
-        assertTrue("Failed to find a rejection for the " + attribute + " attribute.", false);
+        fail("Failed to find a rejection for the " + attribute + " attribute.");
     }
 
     /**
