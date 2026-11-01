@@ -1,39 +1,31 @@
 package com.sctrcd.drools.util;
 
+import java.util.Arrays;
 import java.util.List;
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseConfiguration;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.conf.EventProcessingOption;
-import org.drools.definition.KnowledgePackage;
-import org.drools.definition.rule.Rule;
-import org.drools.event.rule.AgendaEventListener;
-import org.drools.event.rule.WorkingMemoryEventListener;
-import org.drools.io.ResourceFactory;
-import org.drools.io.impl.UrlResource;
-import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.event.rule.AgendaEventListener;
+import org.kie.api.event.rule.RuleRuntimeEventListener;
+import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Initialises and encapsulates the various components required for the rules engine.
- * Includes initialising the knowledge base, creating a stateful session and attaching
+ * Includes initialising the knowledge base, creating a stateless session and attaching
  * listeners for the default events.
  *
  * @author Stephen Masters
  */
-public class StatelessKnowledgeEnvironment {
+public final class StatelessKnowledgeEnvironment {
 
     private static Logger log = LoggerFactory.getLogger(StatelessKnowledgeEnvironment.class);
 
     private DroolsResource[] resources;
 
-    private KnowledgeBase knowledgeBase;
-    private StatelessKnowledgeSession knowledgeSession;
+    private KieBase knowledgeBase;
+    private StatelessKieSession knowledgeSession;
     private TrackingAgendaEventListener agendaEventListener;
     private TrackingWorkingMemoryEventListener workingMemoryEventListener;
 
@@ -42,57 +34,10 @@ public class StatelessKnowledgeEnvironment {
      * list of resources, which may be local. Particularly useful when testing
      * DRL files.
      *
-     * @param resources
+     * @param resources The classpath or file resources to build the knowledge base from.
      */
     public StatelessKnowledgeEnvironment(DroolsResource[] resources) {
         initialise(resources);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param url The URL of the package via the Guvnor REST API.
-     */
-    public StatelessKnowledgeEnvironment(String url) {
-        initialise(url);
-    }
-
-    /**
-     * This constructor sets up a user name and password. Handy if you're
-     * connecting to Guvnor and it's locked down.
-     *
-     * @param url The URL of the package via the Guvnor REST API.
-     * @param username The Guvnor user name.
-     * @param password The Guvnor password.
-     */
-    public StatelessKnowledgeEnvironment(String url, String username, String password) {
-        initialise(url, username, password);
-    }
-
-    /**
-     * Initialises the knowledge environment by downloading the package from the
-     * Guvnor REST interface, at the location defined in the URL.
-     *
-     * @param url The URL of the package via the Guvnor REST API.
-     */
-    public void initialise(String url) {
-        this.resources = new DroolsResource[] {new DroolsResource(url, ResourcePathType.URL, ResourceType.PKG)};
-        initialise();
-    }
-
-    /**
-     * Initialises the knowledge environment by downloading the package from the
-     * Guvnor REST interface, at the location defined in the URL.
-     *
-     * @param url The URL of the package via the Guvnor REST API.
-     * @param username The Guvnor user name.
-     * @param password The Guvnor password.
-     */
-    public void initialise(String url, String username, String password) {
-        this.resources = new DroolsResource[] {
-            new DroolsResource(url, ResourcePathType.URL, ResourceType.PKG, username, password)
-        };
-        initialise();
     }
 
     /**
@@ -112,7 +57,7 @@ public class StatelessKnowledgeEnvironment {
      * previously in the constructor.
      */
     public void initialise() {
-        log.info("Initialising KnowledgeEnvironment with resources: " + this.resources);
+        log.info("Initialising KnowledgeEnvironment with resources: " + Arrays.toString(this.resources));
         this.knowledgeBase = createKnowledgeBase(this.resources);
 
         // Log a description of the new knowledge base.
@@ -128,7 +73,7 @@ public class StatelessKnowledgeEnvironment {
     public void initialiseSession() {
         log.info("Initialising session...");
         if (this.knowledgeSession == null) {
-            this.knowledgeSession = knowledgeBase.newStatelessKnowledgeSession();
+            this.knowledgeSession = knowledgeBase.newStatelessKieSession();
             this.agendaEventListener = new TrackingAgendaEventListener();
             this.knowledgeSession.addEventListener(this.agendaEventListener);
             this.workingMemoryEventListener = new TrackingWorkingMemoryEventListener();
@@ -179,20 +124,20 @@ public class StatelessKnowledgeEnvironment {
     }
 
     /**
-     * Attaches a {@link WorkingMemoryEventListener} to the session.
+     * Attaches a {@link RuleRuntimeEventListener} to the session.
      *
      * @param listener The listener to be attached.
      */
-    public void addEventListener(WorkingMemoryEventListener listener) {
+    public void addEventListener(RuleRuntimeEventListener listener) {
         knowledgeSession.addEventListener(listener);
     }
 
     /**
-     * Disconnects a {@link WorkingMemoryEventListener} from the session.
+     * Disconnects a {@link RuleRuntimeEventListener} from the session.
      *
      * @param listener The listener to be disconnected.
      */
-    public void removeEventListener(WorkingMemoryEventListener listener) {
+    public void removeEventListener(RuleRuntimeEventListener listener) {
         knowledgeSession.removeEventListener(listener);
     }
 
@@ -202,51 +147,11 @@ public class StatelessKnowledgeEnvironment {
      * @param resources
      *            An array of {@link DroolsResource} indicating where the
      *            various resources should be loaded from. These could be
-     *            classpath, file or URL resources.
+     *            classpath or file resources.
      * @return A new knowledge base.
      */
-    public KnowledgeBase createKnowledgeBase(DroolsResource[] resources) {
-        KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-
-        for (DroolsResource resource : resources) {
-            log.info("Resource: " + resource.getType() + ", path type=" + resource.getPathType() + ", path="
-                    + resource.getPath());
-            switch (resource.getPathType()) {
-                case CLASSPATH:
-                    builder.add(ResourceFactory.newClassPathResource(resource.getPath()), resource.getType());
-                    break;
-                case FILE:
-                    builder.add(ResourceFactory.newFileResource(resource.getPath()), resource.getType());
-                    break;
-                case URL:
-                    UrlResource urlResource = (UrlResource) ResourceFactory.newUrlResource(resource.getPath());
-
-                    if (resource.getUsername() != null) {
-                        log.info("Setting authentication for: " + resource.getUsername());
-                        urlResource.setBasicAuthentication("enabled");
-                        urlResource.setUsername(resource.getUsername());
-                        urlResource.setPassword(resource.getPassword());
-                    }
-
-                    builder.add(urlResource, resource.getType());
-
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unable to build this resource path type.");
-            }
-        }
-
-        if (builder.hasErrors()) {
-            throw new RuntimeException(builder.getErrors().toString());
-        }
-
-        KnowledgeBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration();
-        conf.setOption(EventProcessingOption.STREAM);
-
-        KnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
-        knowledgeBase.addKnowledgePackages(builder.getKnowledgePackages());
-
-        return knowledgeBase;
+    public KieBase createKnowledgeBase(DroolsResource[] resources) {
+        return DroolsUtil.createKnowledgeBase(resources, EventProcessingOption.STREAM);
     }
 
     public List<Activation> getActivationList() {
@@ -257,15 +162,9 @@ public class StatelessKnowledgeEnvironment {
      *
      * @return A String detailing the packages and rules in this knowledge base.
      */
+    @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (KnowledgePackage p : knowledgeBase.getKnowledgePackages()) {
-            sb.append("\n  Package : " + p.getName());
-            for (Rule r : p.getRules()) {
-                sb.append("\n    Rule: " + r.getName());
-            }
-        }
-        return "Knowledge base built with packages: " + sb.toString();
+        return DroolsUtil.knowledgeBaseDetails(knowledgeBase);
     }
 
     /**
@@ -273,7 +172,7 @@ public class StatelessKnowledgeEnvironment {
      *
      * @param session The session to search for facts.
      */
-    public void printFacts(StatefulKnowledgeSession session) {
+    public void printFacts(KieSession session) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n************************************************************");
         sb.append("\nThe following facts are currently in the system...");

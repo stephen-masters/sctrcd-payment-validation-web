@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>IBAN validation</title>
+<link rel="stylesheet" type="text/css" th:href="@{/resources/css/iban.css}" href="/resources/css/iban.css">
+<script th:src="@{/resources/js/iban.js}" src="/resources/js/iban.js" defer></script>
+</head>
+<body>
+
+<div id="ibanValidator">
+  <form id="ibanForm" th:attr="data-validate-url=@{/iban/validate/}" data-validate-url="/iban/validate/">
+    <div><label for="ibanRequest">IBAN Validator</label></div>
+    <input type="text" name="ibanRequest" id="ibanRequest">
+    <input type="submit" id="validateIbanBtn" value="Validate">
+    <div id="ibanValidationResults" aria-live="polite">&nbsp;</div>
+  </form>
+</div>
+
+</body>
+</html>

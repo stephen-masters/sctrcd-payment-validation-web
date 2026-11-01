@@ -1,6 +1,6 @@
 package com.sctrcd.drools.util;
 
-import org.drools.KnowledgeBase;
+import org.kie.api.KieBase;
 
 /**
  *
@@ -14,7 +14,7 @@ public class UnknownFactTypeException extends Exception {
         super();
     }
 
-    public UnknownFactTypeException(String factType, String pkg, KnowledgeBase knowledgeBase) {
+    public UnknownFactTypeException(String factType, String pkg, KieBase knowledgeBase) {
         super("No [" + factType + "] fact type found in package [" + pkg + "] in knowledge base: "
                 + DroolsUtil.knowledgeBaseDetails(knowledgeBase));
     }

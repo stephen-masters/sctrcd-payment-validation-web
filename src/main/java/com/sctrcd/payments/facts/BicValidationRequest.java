@@ -1,6 +1,6 @@
 package com.sctrcd.payments.facts;
 
-public class BicValidationRequest extends ValidationRequest {
+public final class BicValidationRequest extends ValidationRequest {
 
     private String bic;
 

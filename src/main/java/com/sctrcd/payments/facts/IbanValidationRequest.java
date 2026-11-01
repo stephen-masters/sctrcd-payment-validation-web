@@ -1,6 +1,6 @@
 package com.sctrcd.payments.facts;
 
-public class IbanValidationRequest extends ValidationRequest {
+public final class IbanValidationRequest extends ValidationRequest {
 
     private String iban;
 

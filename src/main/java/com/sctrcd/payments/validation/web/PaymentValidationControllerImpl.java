@@ -38,7 +38,7 @@ public class PaymentValidationControllerImpl implements PaymentValidationControl
     @RequestMapping(value = "/bic/validate/{bic}", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody BicValidationResult validateBic(@PathVariable String bic) {
         BicValidationResult result = bicValidator.validate(bic);
-        log.debug("Validated IBAN: " + result.toString());
+        log.debug("Validated BIC: " + result.toString());
         return result;
     }
 

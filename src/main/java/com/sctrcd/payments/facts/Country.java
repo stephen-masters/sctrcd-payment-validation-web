@@ -1,14 +1,11 @@
 package com.sctrcd.payments.facts;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
+/**
+ * A country, as matched by the rules against the <code>countryList</code> global.
+ */
 public class Country {
 
-    @Id
     private String isoCode;
-
     private String name;
 
     public Country() {}

@@ -62,11 +62,10 @@ public class BeanMatcher {
      * If any filter is not in the bean properties or the value differs, then
      * this will return false.
      */
-    @SuppressWarnings("unchecked")
     public boolean matches(Object bean, Map<String, Object> filters) {
         if (filters.size() == 0) return true;
         try {
-            return matches(BeanUtils.describe(bean), filters);
+            return matches(new HashMap<String, Object>(BeanUtils.describe(bean)), filters);
         } catch (IllegalAccessException e) {
             return false;
         } catch (InvocationTargetException e) {

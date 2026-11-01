@@ -1,15 +1,16 @@
 package com.sctrcd.drools.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.BeanUtils;
-import org.drools.event.rule.DefaultWorkingMemoryEventListener;
-import org.drools.event.rule.ObjectInsertedEvent;
-import org.drools.event.rule.ObjectRetractedEvent;
-import org.drools.event.rule.ObjectUpdatedEvent;
-import org.drools.event.rule.WorkingMemoryEvent;
-import org.drools.runtime.rule.FactHandle;
+import org.kie.api.event.rule.DefaultRuleRuntimeEventListener;
+import org.kie.api.event.rule.ObjectDeletedEvent;
+import org.kie.api.event.rule.ObjectInsertedEvent;
+import org.kie.api.event.rule.ObjectUpdatedEvent;
+import org.kie.api.event.rule.RuleRuntimeEvent;
+import org.kie.api.runtime.rule.FactHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stephen Masters
  */
-public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEventListener {
+public class TrackingWorkingMemoryEventListener extends DefaultRuleRuntimeEventListener {
 
     private static Logger log = LoggerFactory.getLogger(TrackingWorkingMemoryEventListener.class);
 
-    private List<WorkingMemoryEvent> allEvents = new ArrayList<WorkingMemoryEvent>();
+    private List<RuleRuntimeEvent> allEvents = new ArrayList<RuleRuntimeEvent>();
     private List<ObjectInsertedEvent> insertions = new ArrayList<ObjectInsertedEvent>();
-    private List<ObjectRetractedEvent> retractions = new ArrayList<ObjectRetractedEvent>();
+    private List<ObjectDeletedEvent> retractions = new ArrayList<ObjectDeletedEvent>();
     private List<ObjectUpdatedEvent> updates = new ArrayList<ObjectUpdatedEvent>();
 
     private List<Map<String, Object>> factChanges = new ArrayList<Map<String, Object>>();
@@ -74,7 +75,7 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
     }
 
     @Override
-    public void objectRetracted(final ObjectRetractedEvent event) {
+    public void objectDeleted(final ObjectDeletedEvent event) {
         if ((handleFilter == null && classFilter == null)
                 || event.getFactHandle() == handleFilter
                 || event.getOldObject().getClass().equals(classFilter)) {
@@ -84,7 +85,6 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void objectUpdated(final ObjectUpdatedEvent event) {
         if ((handleFilter == null && classFilter == null)
@@ -95,7 +95,7 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
 
             Object fact = event.getObject();
             try {
-                factChanges.add(BeanUtils.describe(fact));
+                factChanges.add(new HashMap<String, Object>(BeanUtils.describe(fact)));
             } catch (Exception e) {
                 log.error("Unable to get object details for tracking: " + DroolsUtil.objectDetails(fact), e);
             }
@@ -103,7 +103,7 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
         }
     }
 
-    public List<WorkingMemoryEvent> getAllEvents() {
+    public List<RuleRuntimeEvent> getAllEvents() {
         return allEvents;
     }
 
@@ -111,7 +111,7 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
         return insertions;
     }
 
-    public List<ObjectRetractedEvent> getRetractions() {
+    public List<ObjectDeletedEvent> getRetractions() {
         return retractions;
     }
 
@@ -139,7 +139,7 @@ public class TrackingWorkingMemoryEventListener extends DefaultWorkingMemoryEven
         for (ObjectInsertedEvent event : insertions) {
             report.append("\n" + DroolsUtil.objectDetails(event.getObject()));
         }
-        for (ObjectRetractedEvent event : retractions) {
+        for (ObjectDeletedEvent event : retractions) {
             report.append("\n" + DroolsUtil.objectDetails(event.getOldObject()));
         }
         for (ObjectUpdatedEvent event : updates) {

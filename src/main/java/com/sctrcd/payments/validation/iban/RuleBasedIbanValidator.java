@@ -10,10 +10,10 @@ import com.sctrcd.payments.facts.Country;
 import com.sctrcd.payments.facts.IbanValidationRequest;
 import java.util.ArrayList;
 import java.util.List;
-import org.drools.KnowledgeBase;
-import org.drools.builder.ResourceType;
-import org.drools.conf.EventProcessingOption;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class RuleBasedIbanValidator implements IbanValidator {
 
     private static Logger log = LoggerFactory.getLogger(RuleBasedIbanValidator.class);
 
-    private KnowledgeBase kbase;
+    private final KieBase kbase;
 
     public final List<Country> countries = new ArrayList<Country>();
 
@@ -46,7 +46,7 @@ public class RuleBasedIbanValidator implements IbanValidator {
     public IbanValidationResult validateIban(String iban) {
         log.debug("Validating IBAN : " + iban + "\n");
 
-        StatelessKnowledgeSession ksession = kbase.newStatelessKnowledgeSession();
+        StatelessKieSession ksession = kbase.newStatelessKieSession();
 
         ksession.setGlobal("countryList", countries);
 

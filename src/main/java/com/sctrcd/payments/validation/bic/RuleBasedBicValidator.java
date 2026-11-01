@@ -10,10 +10,10 @@ import com.sctrcd.payments.facts.BicValidationRequest;
 import com.sctrcd.payments.facts.Country;
 import java.util.ArrayList;
 import java.util.List;
-import org.drools.KnowledgeBase;
-import org.drools.builder.ResourceType;
-import org.drools.conf.EventProcessingOption;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.StatelessKieSession;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service("ruleBasedBicValidator")
 public class RuleBasedBicValidator implements BicValidator {
 
-    private KnowledgeBase kbase;
+    private final KieBase kbase;
 
     public final List<Country> countries = new ArrayList<Country>();
 
@@ -40,7 +40,7 @@ public class RuleBasedBicValidator implements BicValidator {
 
     @Override
     public BicValidationResult validate(String bic) {
-        StatelessKnowledgeSession ksession = kbase.newStatelessKnowledgeSession();
+        StatelessKieSession ksession = kbase.newStatelessKieSession();
 
         ksession.setGlobal("countryList", countries);
 

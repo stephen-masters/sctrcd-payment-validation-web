@@ -7,7 +7,7 @@ import com.sctrcd.payments.validation.ValidationResult;
  *
  * @author Stephen Masters
  */
-public class IbanValidationResult extends ValidationResult {
+public final class IbanValidationResult extends ValidationResult {
 
     private String iban;
 

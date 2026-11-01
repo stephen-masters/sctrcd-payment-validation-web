@@ -9,7 +9,7 @@ import java.util.Collection;
  *
  * @author Stephen Masters
  */
-public class BicValidationResult extends ValidationResult {
+public final class BicValidationResult extends ValidationResult {
 
     private String bic;
 

@@ -11,10 +11,10 @@ import com.sctrcd.payments.facts.Payment;
 import com.sctrcd.payments.facts.PaymentValidationRequest;
 import java.util.ArrayList;
 import java.util.List;
-import org.drools.KnowledgeBase;
-import org.drools.builder.ResourceType;
-import org.drools.conf.EventProcessingOption;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.conf.EventProcessingOption;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.StatelessKieSession;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service("ruleBasedPaymentValidator")
 public class RuleBasedPaymentValidator implements PaymentValidator {
 
-    private KnowledgeBase kbase;
+    private final KieBase kbase;
 
     public final List<Country> countries = new ArrayList<Country>();
 
@@ -45,7 +45,7 @@ public class RuleBasedPaymentValidator implements PaymentValidator {
 
     @Override
     public FxPaymentValidationResult validatePayment(Payment payment) {
-        StatelessKnowledgeSession ksession = kbase.newStatelessKnowledgeSession();
+        StatelessKieSession ksession = kbase.newStatelessKieSession();
 
         ksession.setGlobal("countryList", countries);
 

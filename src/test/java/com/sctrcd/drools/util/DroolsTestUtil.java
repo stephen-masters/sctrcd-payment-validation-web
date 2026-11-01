@@ -1,7 +1,7 @@
 package com.sctrcd.drools.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sctrcd.beans.BeanPropertyFilter;
 import java.lang.reflect.InvocationTargetException;
@@ -25,8 +25,8 @@ public class DroolsTestUtil {
     public static void assertRuleFired(KnowledgeEnvironment kenv, String... ruleNames) {
         for (String ruleName : ruleNames) {
             assertTrue(
-                    "Rule [" + ruleName + "] should have fired.",
-                    DroolsUtil.ruleFired(kenv.findActivations(), ruleName));
+                    DroolsUtil.ruleFired(kenv.findActivations(), ruleName),
+                    "Rule [" + ruleName + "] should have fired.");
         }
     }
 
@@ -38,8 +38,8 @@ public class DroolsTestUtil {
     public static void assertRuleNotFired(KnowledgeEnvironment kenv, String... ruleNames) {
         for (String ruleName : ruleNames) {
             assertFalse(
-                    "Rule [" + ruleName + "] should not have fired.",
-                    DroolsUtil.ruleFired(kenv.findActivations(), ruleName));
+                    DroolsUtil.ruleFired(kenv.findActivations(), ruleName),
+                    "Rule [" + ruleName + "] should not have fired.");
         }
     }
 
