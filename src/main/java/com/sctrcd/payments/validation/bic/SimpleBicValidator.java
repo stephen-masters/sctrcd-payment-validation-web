@@ -1,6 +1,7 @@
 package com.sctrcd.payments.validation.bic;
 
 import com.sctrcd.payments.facts.AnnotationLevel;
+import com.sctrcd.payments.facts.PaymentAttribute;
 import com.sctrcd.payments.facts.PaymentValidationAnnotation;
 import org.springframework.stereotype.Service;
 
@@ -37,12 +38,15 @@ public class SimpleBicValidator {
      * Validates that the BIC follows the ISO_9362 structure.
      */
     public static boolean isValid(String bic) {
-        int len = bic.length();
-
-        if (len != 8 || len != 11) {
+        if (bic == null) {
             return false;
         }
-        return bic.toUpperCase().matches("/[a-zA-Z]{6}([0-9a-zA-Z]{2}|[0-9a-zA-Z]{5})/");
+        int len = bic.length();
+
+        if (len != 8 && len != 11) {
+            return false;
+        }
+        return bic.matches("[a-zA-Z]{6}[0-9a-zA-Z]{2}([0-9a-zA-Z]{3})?");
     }
 
     /**
@@ -54,8 +58,9 @@ public class SimpleBicValidator {
         } else {
             return new BicValidationResult(
                     bic,
-                    true,
-                    new PaymentValidationAnnotation("ISO_9362 check", AnnotationLevel.REJECT, "BIC is not valid."));
+                    false,
+                    new PaymentValidationAnnotation(
+                            "ISO_9362 check", AnnotationLevel.REJECT, "BIC is not valid.", PaymentAttribute.bic));
         }
     }
 }
