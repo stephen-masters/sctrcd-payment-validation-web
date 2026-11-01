@@ -18,7 +18,7 @@ public final class BicValidationRequest extends ValidationRequest {
     }
 
     /**
-     * Strips whitespace out of the IBAN before setting the field.
+     * Strips whitespace out of the BIC before setting the field.
      * Whitespace is not relevant to validation.
      */
     public void setBic(String bic) {
@@ -27,6 +27,6 @@ public final class BicValidationRequest extends ValidationRequest {
 
     @Override
     public void reject(String ruleName, String message) {
-        super.reject(ruleName, message, PaymentAttribute.iban);
+        super.reject(ruleName, message, PaymentAttribute.bic);
     }
 }

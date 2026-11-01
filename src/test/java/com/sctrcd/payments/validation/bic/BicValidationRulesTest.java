@@ -110,6 +110,8 @@ public class BicValidationRulesTest {
         assertFalse(
                 (expectedRules == null || expectedRules.length == 0) && annotations.size() > 0,
                 "There should not be any annotations if there is no expected message.");
+        assertEquals(expectedRules.length, annotations.size(), "Each rule that fires should annotate the request.");
+        assertEquals(expectedRules.length == 0, result.isValid());
 
         System.out.println(agendaEventListener.activationsToString());
 
