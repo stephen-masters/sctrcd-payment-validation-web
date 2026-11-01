@@ -52,17 +52,15 @@ Boot GA release and the latest Apache KIE Drools release (`drools.version`).
 Versions come from the Spring Boot parent and the imported Drools BOM: do
 not pin a version that either already manages.
 
-## Known quirks, kept from the original
+### Each rule file gathers its own annotations
 
-These predate the move to Spring Boot and are left alone so that the port
-changes no behaviour. Fix them deliberately, with tests, if at all.
-
-- `SimpleBicValidator`, which `/bic/validate/{bic}` uses, rejects every BIC:
-  its length check (`len != 8 || len != 11`) is always true.
-- `BicRules.drl` has no rule that copies its annotations onto the
-  `BicValidationRequest`, so `RuleBasedBicValidator` on its own always
-  reports a BIC as valid. Through `/payment/validate`, `PaymentRules.drl`
-  gathers them and BIC rejections do show.
+`IbanRules.drl` and `BicRules.drl` each end with a low-salience rule that
+copies their annotations (matched on `attribute`) onto their own request
+fact, without `update()`, which would re-trigger the rules in a loop. The
+rule-based IBAN and BIC validators read their results from those requests,
+so an annotation inserted without its `PaymentAttribute` is silently lost
+outside `/payment/validate`. The validator tests check that every rejection
+reaches the result.
 
 ## Layout
 
